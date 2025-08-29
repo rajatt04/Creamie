@@ -28,9 +28,9 @@ fun DashboardScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                windowInsets = WindowInsets(0,0,0,0),
                 title = {
                     Text(
                         text = "Pexels Dashboard",
@@ -52,14 +52,22 @@ fun DashboardScreen() {
                             contentDescription = "Refresh"
                         )
                     }
-                }
+                },
+                windowInsets = WindowInsets(0, 0, 0, 0) // Remove default insets since parent handles them
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0) // Remove default insets since parent handles them
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             // Tabs linked to pager
-            TabRow(selectedTabIndex = pagerState.currentPage) {
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = pagerState.currentPage == index,
@@ -107,7 +115,8 @@ fun DashboardScreen() {
                     // Show photo list
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.padding(12.dp)
+                        contentPadding = PaddingValues(12.dp),
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         items(photos) { photo ->
                             Card(
