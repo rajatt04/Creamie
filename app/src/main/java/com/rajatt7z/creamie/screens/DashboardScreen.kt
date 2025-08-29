@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +31,7 @@ fun DashboardScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = "Pexels Dashboard",
@@ -46,10 +47,10 @@ fun DashboardScreen() {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Trigger refresh */ }) {
+                    IconButton(onClick = { /* TODO: Trigger Search */ }) {
                         Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
                         )
                     }
                 },
