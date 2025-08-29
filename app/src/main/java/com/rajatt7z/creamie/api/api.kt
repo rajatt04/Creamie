@@ -10,12 +10,25 @@ data class PhotoResponse(
 
 data class Photo(
     val id: Int,
-    val src: Src
+    val width: Int,
+    val height: Int,
+    val photographer: String, // Added photographer field
+    val photographer_url: String, // Added photographer URL
+    val photographer_id: Int, // Added photographer ID
+    val src: Src,
+    val liked: Boolean = false, // Added liked field
+    val alt: String = "" // Added alt text field
 )
 
 data class Src(
+    val original: String,
+    val large2x: String,
+    val large: String,
     val medium: String,
-    val large: String
+    val small: String,
+    val portrait: String,
+    val landscape: String,
+    val tiny: String
 )
 
 interface PexelsApi {
