@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +70,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import androidx.core.graphics.scale
+import androidx.compose.ui.graphics.toArgb
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +84,8 @@ fun WallpaperScreen(
     var imageOpacity by remember { mutableFloatStateOf(1f) }
     var imageTint by remember { mutableStateOf(false) }
     var scale by remember { mutableFloatStateOf(1f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
     var isSettingWallpaper by remember { mutableStateOf(false) }
 
     // Animated values for smooth transitions
@@ -93,6 +98,16 @@ fun WallpaperScreen(
         targetValue = scale,
         animationSpec = tween(300),
         label = "scale"
+    )
+    val animatedOffsetX by animateFloatAsState(
+        targetValue = offsetX,
+        animationSpec = tween(300),
+        label = "offsetX"
+    )
+    val animatedOffsetY by animateFloatAsState(
+        targetValue = offsetY,
+        animationSpec = tween(300),
+        label = "offsetY"
     )
 
     Scaffold(
@@ -131,6 +146,8 @@ fun WallpaperScreen(
                     imageOpacity = 1f
                     imageTint = false
                     scale = 1f
+                    offsetX = 0f
+                    offsetY = 0f
                 },
                 icon = { Icon(Icons.Default.Refresh, contentDescription = "Reset") },
                 text = { Text("Reset") },
@@ -168,8 +185,17 @@ fun WallpaperScreen(
                             .graphicsLayer(
                                 scaleX = animatedScale,
                                 scaleY = animatedScale,
-                                alpha = animatedOpacity
-                            ),
+                                alpha = animatedOpacity,
+                                translationX = animatedOffsetX,
+                                translationY = animatedOffsetY
+                            )
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consume()
+                                    offsetX += dragAmount.x
+                                    offsetY += dragAmount.y
+                                }
+                            },
                         contentScale = ContentScale.Crop,
                         colorFilter = if (imageTint) {
                             androidx.compose.ui.graphics.ColorFilter.tint(
@@ -202,6 +228,14 @@ fun WallpaperScreen(
                     )
                 }
             }
+
+            // Help text for pan gesture
+            Text(
+                text = "Drag the image to reposition • Pinch or use zoom slider to scale",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
 
             // Adjustment controls
             Card(
@@ -264,6 +298,21 @@ fun WallpaperScreen(
                         onValueChange = { scale = it },
                         valueRange = 0.8f..2f
                     )
+
+                    // Position controls
+                    AdjustmentSlider(
+                        label = "Position X",
+                        value = offsetX / 100f, // Scale down for slider
+                        onValueChange = { offsetX = it * 100f },
+                        valueRange = -3f..3f
+                    )
+
+                    AdjustmentSlider(
+                        label = "Position Y",
+                        value = offsetY / 100f, // Scale down for slider
+                        onValueChange = { offsetY = it * 100f },
+                        valueRange = -3f..3f
+                    )
                 }
             }
 
@@ -303,7 +352,9 @@ fun WallpaperScreen(
                                     WallpaperManager.FLAG_SYSTEM,
                                     imageOpacity,
                                     imageTint,
-                                    scale
+                                    scale,
+                                    offsetX,
+                                    offsetY
                                 )
                             },
                             modifier = Modifier.weight(1f),
@@ -325,7 +376,9 @@ fun WallpaperScreen(
                                     WallpaperManager.FLAG_LOCK,
                                     imageOpacity,
                                     imageTint,
-                                    scale
+                                    scale,
+                                    offsetX,
+                                    offsetY
                                 )
                             },
                             modifier = Modifier.weight(1f),
@@ -350,7 +403,9 @@ fun WallpaperScreen(
                                 WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK,
                                 imageOpacity,
                                 imageTint,
-                                scale
+                                scale,
+                                offsetX,
+                                offsetY
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -429,7 +484,9 @@ fun setWallpaper(
     flag: Int,
     opacity: Float = 1f,
     themeTint: Boolean = false,
-    scale: Float = 1f
+    scale: Float = 1f,
+    offsetX: Float = 0f,
+    offsetY: Float = 0f
 ) {
     val scope = CoroutineScope(Dispatchers.IO)
     scope.launch {
@@ -440,16 +497,73 @@ fun setWallpaper(
 
             // Download the image
             val originalBitmap = BitmapFactory.decodeStream(URL(imageUrl).openStream())
-            val processedBitmap = if (scale != 1f) {
-                val newWidth = (originalBitmap.width * scale).toInt()
-                val newHeight = (originalBitmap.height * scale).toInt()
-                originalBitmap.scale(newWidth, newHeight)
+
+            // Get screen dimensions for proper wallpaper sizing
+            val displayMetrics = context.resources.displayMetrics
+            val screenWidth = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
+
+            // Create a bitmap canvas to apply all transformations
+            val processedBitmap = android.graphics.Bitmap.createBitmap(
+                screenWidth,
+                screenHeight,
+                android.graphics.Bitmap.Config.ARGB_8888
+            )
+            val canvas = android.graphics.Canvas(processedBitmap)
+
+            // Create paint for opacity and tint effects
+            val paint = android.graphics.Paint().apply {
+                alpha = (opacity * 255).toInt()
+                isAntiAlias = true
+            }
+
+            // Apply theme tint if enabled
+            if (themeTint) {
+                // Create a simple overlay color for tinting
+                val tintColor = android.graphics.Color.argb(
+                    (0.3f * 255).toInt(), // 30% alpha
+                    100, // Red component
+                    150, // Green component
+                    255  // Blue component (giving a blue-ish tint)
+                )
+                val colorFilter = android.graphics.PorterDuffColorFilter(
+                    tintColor,
+                    android.graphics.PorterDuff.Mode.OVERLAY
+                )
+                paint.colorFilter = colorFilter
+            }
+
+            // Calculate scaled dimensions
+            val scaledWidth = (originalBitmap.width * scale).toInt()
+            val scaledHeight = (originalBitmap.height * scale).toInt()
+
+            // Scale the bitmap
+            val scaledBitmap = if (scale != 1f) {
+                android.graphics.Bitmap.createScaledBitmap(
+                    originalBitmap,
+                    scaledWidth,
+                    scaledHeight,
+                    true
+                )
             } else {
                 originalBitmap
             }
 
+            // Calculate position with offset
+            val centerX = (screenWidth - scaledWidth) / 2f + offsetX
+            val centerY = (screenHeight - scaledHeight) / 2f + offsetY
+
+            // Draw the bitmap with all transformations applied
+            canvas.drawBitmap(scaledBitmap, centerX, centerY, paint)
+
             val wm = WallpaperManager.getInstance(context)
             wm.setBitmap(processedBitmap, null, true, flag)
+
+            // Clean up bitmaps
+            if (scaledBitmap != originalBitmap) {
+                scaledBitmap.recycle()
+            }
+            originalBitmap.recycle()
 
             withContext(Dispatchers.Main) {
                 val wallpaperType = when (flag) {
