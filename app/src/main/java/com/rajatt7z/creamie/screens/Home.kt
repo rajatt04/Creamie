@@ -1,5 +1,6 @@
 package com.rajatt7z.creamie.screens
 
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -75,9 +76,14 @@ fun Home() {
             startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Dashboard.route) { DashboardScreen() }
+            composable(Screen.Dashboard.route) { DashboardScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen() }
             composable(Screen.Settings.route) { SettingsScreen() }
+            composable("wallpaper/{imageUrl}") { backStackEntry ->
+                val url = backStackEntry.arguments?.getString("imageUrl") ?: ""
+                val imageUrl = Uri.decode(url)
+                WallpaperScreen(imageUrl)
+            }
         }
     }
 }
