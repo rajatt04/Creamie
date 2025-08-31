@@ -1,12 +1,38 @@
 package com.rajatt7z.creamie.screens
 
 import android.net.Uri
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -15,9 +41,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,29 +80,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import com.rajatt7z.creamie.api.ApiClient
 import com.rajatt7z.creamie.api.Photo
-import com.rajatt7z.creamie.viewmodel.DashboardViewModel
-import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
-fun DashboardScreen(
-    navController: NavController,
-    viewModel: DashboardViewModel = viewModel()
-) {
+fun DashboardScreen(navController: NavController) {
     val tabs = listOf("Nature", "Tech", "Games", "Health", "Sea")
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.uiState.collectAsState()
 
     // Search state
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf<List<Photo>>(emptyList()) }
+    var isSearchLoading by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -113,7 +160,10 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(
                             onClick = {
-                                viewModel.refreshCurrentTab(tabs[pagerState.currentPage].lowercase())
+                                // Refresh current tab
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage)
+                                }
                             },
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -129,7 +179,7 @@ fun DashboardScreen(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent
                     ),
-                    windowInsets = TopAppBarDefaults.windowInsets
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
             }
 
@@ -163,10 +213,7 @@ fun DashboardScreen(
 
                         TextField(
                             value = searchQuery,
-                            onValueChange = {
-                                searchQuery = it
-                                viewModel.searchPhotos(it)
-                            },
+                            onValueChange = { searchQuery = it },
                             placeholder = {
                                 Text(
                                     "Search beautiful images...",
@@ -189,7 +236,7 @@ fun DashboardScreen(
                             IconButton(
                                 onClick = {
                                     searchQuery = ""
-                                    viewModel.clearSearch()
+                                    searchResults = emptyList()
                                 }
                             ) {
                                 Icon(
@@ -205,7 +252,7 @@ fun DashboardScreen(
                                 isSearchActive = false
                                 focusManager.clearFocus()
                                 searchQuery = ""
-                                viewModel.clearSearch()
+                                searchResults = emptyList()
                             }
                         ) {
                             Text(
@@ -218,7 +265,7 @@ fun DashboardScreen(
                 }
             }
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
@@ -243,85 +290,72 @@ fun DashboardScreen(
 
                 // Show search results or tabs content
                 if (isSearchActive && searchQuery.isNotEmpty()) {
+                    // Perform search when query changes
+                    LaunchedEffect(searchQuery) {
+                        if (searchQuery.trim().isNotEmpty()) {
+                            try {
+                                isSearchLoading = true
+                                val response = ApiClient.api.searchPhotos(searchQuery.trim(), 20)
+                                searchResults = response.photos
+                            } catch (e: Exception) {
+                                searchResults = emptyList()
+                            } finally {
+                                isSearchLoading = false
+                            }
+                        }
+                    }
+
                     // Search Results UI
-                    when {
-                        uiState.isSearchLoading -> {
-                            Box(
-                                Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                    if (isSearchLoading) {
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(48.dp),
-                                        strokeWidth = 4.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        "Searching for \"$searchQuery\"...",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(48.dp),
+                                    strokeWidth = 4.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Searching for \"$searchQuery\"...",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
-                        uiState.searchError != null -> {
-                            Box(
-                                Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                    } else if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Text(
-                                        "Search failed",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Text(
-                                        uiState.searchError!!,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                                Text(
+                                    "No results found",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    "Try searching for something else",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
-                        uiState.searchResults.isEmpty() && searchQuery.isNotEmpty() -> {
-                            Box(
-                                Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Text(
-                                        "No results found",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Text(
-                                        "Try searching for something else",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
-                        else -> {
-                            PhotoGrid(
-                                photos = uiState.searchResults,
-                                navController = navController,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                    } else {
+                        PhotoGrid(
+                            photos = searchResults,
+                            navController = navController,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
                 } else {
                     // Tab content
@@ -395,8 +429,7 @@ fun DashboardScreen(
                                 ) { page ->
                                     TabContent(
                                         query = tabs[page].lowercase(),
-                                        navController = navController,
-                                        viewModel = viewModel
+                                        navController = navController
                                     )
                                 }
                             }
@@ -418,70 +451,48 @@ fun DashboardScreen(
 @Composable
 private fun TabContent(
     query: String,
-    navController: NavController,
-    viewModel: DashboardViewModel
+    navController: NavController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    var photos by remember { mutableStateOf<List<Photo>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(query) {
-        viewModel.loadPhotosForTab(query)
+        try {
+            isLoading = true
+            val response = ApiClient.api.searchPhotos(query, 15)
+            photos = response.photos
+        } catch (e: Exception) {
+            photos = emptyList()
+        } finally {
+            isLoading = false
+        }
     }
 
-    when {
-        uiState.isLoading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(56.dp),
-                        strokeWidth = 5.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                    Text(
-                        "Loading $query images...",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(56.dp),
+                    strokeWidth = 5.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+                Text(
+                    "Loading $query images...",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-        uiState.error != null -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        "Failed to load images",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        uiState.error!!,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Button(
-                        onClick = { viewModel.loadPhotosForTab(query) },
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text("Retry")
-                    }
-                }
-            }
-        }
-        else -> {
-            PhotoGrid(
-                photos = uiState.photos,
-                navController = navController,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+    } else {
+        PhotoGrid(
+            photos = photos,
+            navController = navController,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
@@ -526,7 +537,7 @@ private fun PhotoGrid(
                     Box {
                         Image(
                             painter = rememberAsyncImagePainter(photo.src.medium),
-                            contentDescription = photo.alt,
+                            contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(220.dp)
@@ -558,7 +569,7 @@ private fun PhotoGrid(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = photo.photographer,
+                                text = photo.photographer ?: "Unknown",
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurface
