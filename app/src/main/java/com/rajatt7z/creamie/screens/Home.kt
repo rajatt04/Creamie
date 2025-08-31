@@ -33,14 +33,13 @@ fun Home() {
     val navController = rememberNavController()
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars),
-        containerColor = MaterialTheme.colorScheme.background, // Ensure proper background
+        modifier = Modifier.fillMaxSize(),
+        // Remove the windowInsetsPadding for status bar to get normal status bar behavior
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars), // Handle navigation bar
-                windowInsets = WindowInsets(0, 0, 0, 0) // Remove default insets since we're handling them manually
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+                windowInsets = WindowInsets(0, 0, 0, 0)
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
@@ -69,7 +68,8 @@ fun Home() {
                 }
             }
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0) // Remove default content insets since we're handling them manually
+        // Let Scaffold handle status bar automatically
+        contentWindowInsets = WindowInsets.systemBars
     ) { innerPadding ->
         NavHost(
             navController = navController,

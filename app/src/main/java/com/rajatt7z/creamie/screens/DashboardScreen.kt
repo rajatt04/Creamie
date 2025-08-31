@@ -129,7 +129,7 @@ fun DashboardScreen(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent
                     ),
-                    windowInsets = WindowInsets(0, 0, 0, 0)
+                    windowInsets = TopAppBarDefaults.windowInsets
                 )
             }
 
@@ -218,7 +218,7 @@ fun DashboardScreen(
                 }
             }
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
