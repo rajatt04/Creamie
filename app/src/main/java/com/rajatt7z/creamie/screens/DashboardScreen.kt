@@ -32,27 +32,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import com.rajatt7z.creamie.api.ApiClient
 import com.rajatt7z.creamie.api.Photo
+import com.rajatt7z.creamie.viewmodel.DashboardViewModel
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
-import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
-fun DashboardScreen(navController: NavController) {
+fun DashboardScreen(
+    navController: NavController,
+    viewModel: DashboardViewModel = viewModel()
+) {
     val tabs = listOf("Nature", "Tech", "Games", "Health", "Sea")
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
 
     // Search state
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    var searchResults by remember { mutableStateOf<List<Photo>>(emptyList()) }
-    var isSearchLoading by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -111,10 +113,7 @@ fun DashboardScreen(navController: NavController) {
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(
                             onClick = {
-                                // Refresh current tab
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage)
-                                }
+                                viewModel.refreshCurrentTab(tabs[pagerState.currentPage].lowercase())
                             },
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -164,7 +163,10 @@ fun DashboardScreen(navController: NavController) {
 
                         TextField(
                             value = searchQuery,
-                            onValueChange = { searchQuery = it },
+                            onValueChange = {
+                                searchQuery = it
+                                viewModel.searchPhotos(it)
+                            },
                             placeholder = {
                                 Text(
                                     "Search beautiful images...",
@@ -187,7 +189,7 @@ fun DashboardScreen(navController: NavController) {
                             IconButton(
                                 onClick = {
                                     searchQuery = ""
-                                    searchResults = emptyList()
+                                    viewModel.clearSearch()
                                 }
                             ) {
                                 Icon(
@@ -203,7 +205,7 @@ fun DashboardScreen(navController: NavController) {
                                 isSearchActive = false
                                 focusManager.clearFocus()
                                 searchQuery = ""
-                                searchResults = emptyList()
+                                viewModel.clearSearch()
                             }
                         ) {
                             Text(
@@ -241,72 +243,85 @@ fun DashboardScreen(navController: NavController) {
 
                 // Show search results or tabs content
                 if (isSearchActive && searchQuery.isNotEmpty()) {
-                    // Perform search when query changes
-                    LaunchedEffect(searchQuery) {
-                        if (searchQuery.trim().isNotEmpty()) {
-                            try {
-                                isSearchLoading = true
-                                val response = ApiClient.api.searchPhotos(searchQuery.trim(), 20)
-                                searchResults = response.photos
-                            } catch (e: Exception) {
-                                searchResults = emptyList()
-                            } finally {
-                                isSearchLoading = false
-                            }
-                        }
-                    }
-
                     // Search Results UI
-                    if (isSearchLoading) {
-                        Box(
-                            Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    when {
+                        uiState.isSearchLoading -> {
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(48.dp),
-                                    strokeWidth = 4.dp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    "Searching for \"$searchQuery\"...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(48.dp),
+                                        strokeWidth = 4.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        "Searching for \"$searchQuery\"...",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
-                    } else if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
-                        Box(
-                            Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                        uiState.searchError != null -> {
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    "No results found",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    "Try searching for something else",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        "Search failed",
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        uiState.searchError!!,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
-                    } else {
-                        PhotoGrid(
-                            photos = searchResults,
-                            navController = navController,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        uiState.searchResults.isEmpty() && searchQuery.isNotEmpty() -> {
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        "No results found",
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "Try searching for something else",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                        else -> {
+                            PhotoGrid(
+                                photos = uiState.searchResults,
+                                navController = navController,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 } else {
                     // Tab content
@@ -380,7 +395,8 @@ fun DashboardScreen(navController: NavController) {
                                 ) { page ->
                                     TabContent(
                                         query = tabs[page].lowercase(),
-                                        navController = navController
+                                        navController = navController,
+                                        viewModel = viewModel
                                     )
                                 }
                             }
@@ -402,48 +418,70 @@ fun DashboardScreen(navController: NavController) {
 @Composable
 private fun TabContent(
     query: String,
-    navController: NavController
+    navController: NavController,
+    viewModel: DashboardViewModel
 ) {
-    var photos by remember { mutableStateOf<List<Photo>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(query) {
-        try {
-            isLoading = true
-            val response = ApiClient.api.searchPhotos(query, 15)
-            photos = response.photos
-        } catch (e: Exception) {
-            photos = emptyList()
-        } finally {
-            isLoading = false
-        }
+        viewModel.loadPhotosForTab(query)
     }
 
-    if (isLoading) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(56.dp),
-                    strokeWidth = 5.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primaryContainer
-                )
-                Text(
-                    "Loading $query images...",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    when {
+        uiState.isLoading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(56.dp),
+                        strokeWidth = 5.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                    Text(
+                        "Loading $query images...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
-    } else {
-        PhotoGrid(
-            photos = photos,
-            navController = navController,
-            modifier = Modifier.fillMaxSize()
-        )
+        uiState.error != null -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        "Failed to load images",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        uiState.error!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Button(
+                        onClick = { viewModel.loadPhotosForTab(query) },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
+        else -> {
+            PhotoGrid(
+                photos = uiState.photos,
+                navController = navController,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -488,7 +526,7 @@ private fun PhotoGrid(
                     Box {
                         Image(
                             painter = rememberAsyncImagePainter(photo.src.medium),
-                            contentDescription = null,
+                            contentDescription = photo.alt,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(220.dp)
@@ -520,7 +558,7 @@ private fun PhotoGrid(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = photo.photographer ?: "Unknown",
+                                text = photo.photographer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurface
