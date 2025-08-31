@@ -81,6 +81,7 @@ fun WallpaperScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -107,7 +108,8 @@ fun WallpaperScreen(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                windowInsets = WindowInsets(0,0,0,0)
             )
         },
         floatingActionButton = {
@@ -118,7 +120,8 @@ fun WallpaperScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0,0,0,0)
     ) { padding ->
         Column(
             modifier = Modifier
