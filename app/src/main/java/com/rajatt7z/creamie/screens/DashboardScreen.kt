@@ -1,17 +1,13 @@
+@file:Suppress("DEPRECATION")
 package com.rajatt7z.creamie.screens
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -39,14 +35,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -75,9 +74,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -88,8 +87,10 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.rajatt7z.creamie.api.ApiClient
 import com.rajatt7z.creamie.api.Photo
+import com.rajatt7z.creamie.data.LikeStorage
 import kotlinx.coroutines.launch
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun DashboardScreen(navController: NavController) {
@@ -97,7 +98,6 @@ fun DashboardScreen(navController: NavController) {
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
-    // Search state
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<Photo>>(emptyList()) }
@@ -106,19 +106,8 @@ fun DashboardScreen(navController: NavController) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    // Animation for floating action button
-    val infiniteTransition = rememberInfiniteTransition(label = "fab_animation")
-    val fabScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "fab_scale"
-    )
+    rememberInfiniteTransition(label = "fab_animation")
 
-    // Gradient colors for expressive design
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
@@ -160,7 +149,6 @@ fun DashboardScreen(navController: NavController) {
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(
                             onClick = {
-                                // Refresh current tab
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(pagerState.currentPage)
                                 }
@@ -183,7 +171,7 @@ fun DashboardScreen(navController: NavController) {
                 )
             }
 
-            // Search Bar
+            // Search bar version
             AnimatedVisibility(
                 visible = isSearchActive,
                 enter = slideInVertically() + fadeIn(),
@@ -195,7 +183,7 @@ fun DashboardScreen(navController: NavController) {
                         .background(gradientBrush)
                         .padding(16.dp),
                     shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     tonalElevation = 6.dp
                 ) {
                     Row(
@@ -269,7 +257,6 @@ fun DashboardScreen(navController: NavController) {
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
-        // Background gradient
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -277,7 +264,7 @@ fun DashboardScreen(navController: NavController) {
                     Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceContainerLow
+                            MaterialTheme.colorScheme.surfaceVariant
                         )
                     )
                 )
@@ -288,16 +275,15 @@ fun DashboardScreen(navController: NavController) {
                     .padding(padding)
             ) {
 
-                // Show search results or tabs content
+                // Search Mode
                 if (isSearchActive && searchQuery.isNotEmpty()) {
-                    // Perform search when query changes
                     LaunchedEffect(searchQuery) {
                         if (searchQuery.trim().isNotEmpty()) {
                             try {
                                 isSearchLoading = true
                                 val response = ApiClient.api.searchPhotos(searchQuery.trim(), 20)
                                 searchResults = response.photos
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 searchResults = emptyList()
                             } finally {
                                 isSearchLoading = false
@@ -305,60 +291,21 @@ fun DashboardScreen(navController: NavController) {
                         }
                     }
 
-                    // Search Results UI
                     if (isSearchLoading) {
                         Box(
                             Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(48.dp),
-                                    strokeWidth = 4.dp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    "Searching for \"$searchQuery\"...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    } else if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
-                        Box(
-                            Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Text(
-                                    "No results found",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    "Try searching for something else",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            CircularProgressIndicator()
                         }
                     } else {
                         PhotoGrid(
                             photos = searchResults,
-                            navController = navController,
-                            modifier = Modifier.fillMaxSize()
+                            navController = navController
                         )
                     }
                 } else {
-                    // Tab content
+                    // Tabs Mode
                     AnimatedContent(
                         targetState = !isSearchActive,
                         transitionSpec = {
@@ -369,55 +316,48 @@ fun DashboardScreen(navController: NavController) {
                     ) { showTabs ->
                         if (showTabs) {
                             Column {
-                                // Expressive Tab Row with gradient
-                                Surface(
+                                TabRow(
+                                    selectedTabIndex = pagerState.currentPage,
                                     modifier = Modifier.fillMaxWidth(),
-                                    color = Color.Transparent
+                                    indicator = { tabPositions ->
+                                        TabRowDefaults.PrimaryIndicator(
+                                            modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                            height = 4.dp,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                        )
+                                    }
                                 ) {
-                                    TabRow(
-                                        selectedTabIndex = pagerState.currentPage,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        indicator = { tabPositions ->
-                                            TabRowDefaults.PrimaryIndicator(
-                                                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                                height = 4.dp,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                    tabs.forEachIndexed { index, title ->
+                                        Tab(
+                                            selected = pagerState.currentPage == index,
+                                            onClick = {
+                                                coroutineScope.launch {
+                                                    pagerState.animateScrollToPage(index)
+                                                }
+                                            },
+                                            modifier = Modifier.padding(vertical = 12.dp)
+                                        ) {
+                                            val isSelected = pagerState.currentPage == index
+                                            val animatedScale by animateFloatAsState(
+                                                targetValue = if (isSelected) 1.1f else 1f,
+                                                animationSpec = spring(
+                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                    stiffness = Spring.StiffnessLow
+                                                ),
+                                                label = "tab_scale"
                                             )
-                                        }
-                                    ) {
-                                        tabs.forEachIndexed { index, title ->
-                                            Tab(
-                                                selected = pagerState.currentPage == index,
-                                                onClick = {
-                                                    coroutineScope.launch {
-                                                        pagerState.animateScrollToPage(index)
-                                                    }
-                                                },
-                                                modifier = Modifier.padding(vertical = 12.dp)
-                                            ) {
-                                                val isSelected = pagerState.currentPage == index
-                                                val animatedScale by animateFloatAsState(
-                                                    targetValue = if (isSelected) 1.1f else 1f,
-                                                    animationSpec = spring(
-                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                        stiffness = Spring.StiffnessLow
-                                                    ),
-                                                    label = "tab_scale"
-                                                )
-
-                                                Text(
-                                                    text = title,
-                                                    modifier = Modifier.scale(animatedScale),
-                                                    style = MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                    ),
-                                                    color = if (isSelected)
-                                                        MaterialTheme.colorScheme.primary
-                                                    else
-                                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
+                                            Text(
+                                                text = title,
+                                                modifier = Modifier.scale(animatedScale),
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                ),
+                                                color = if (isSelected)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         }
                                     }
                                 }
@@ -440,7 +380,7 @@ fun DashboardScreen(navController: NavController) {
         }
     }
 
-    // Auto-focus search when activated
+    // Auto-focus search
     LaunchedEffect(isSearchActive) {
         if (isSearchActive) {
             focusRequester.requestFocus()
@@ -461,7 +401,7 @@ private fun TabContent(
             isLoading = true
             val response = ApiClient.api.searchPhotos(query, 15)
             photos = response.photos
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             photos = emptyList()
         } finally {
             isLoading = false
@@ -470,28 +410,12 @@ private fun TabContent(
 
     if (isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(56.dp),
-                    strokeWidth = 5.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primaryContainer
-                )
-                Text(
-                    "Loading $query images...",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            CircularProgressIndicator()
         }
     } else {
         PhotoGrid(
             photos = photos,
-            navController = navController,
-            modifier = Modifier.fillMaxSize()
+            navController = navController
         )
     }
 }
@@ -505,78 +429,59 @@ private fun PhotoGrid(
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(16.dp),
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) {
         items(photos) { photo ->
-            var isVisible by remember { mutableStateOf(false) }
+            PhotoCard(photo = photo, navController = navController)
+        }
+    }
+}
 
-            LaunchedEffect(Unit) {
-                isVisible = true
-            }
+@Composable
+private fun PhotoCard(photo: Photo, navController: NavController) {
+    val context = LocalContext.current
+    var isLiked by remember { mutableStateOf(LikeStorage.isLiked(context, photo.src.original)) }
 
-            AnimatedVisibility(
-                visible = isVisible,
-                enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut()
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            navController.navigate("wallpaper/${Uri.encode(photo.src.original)}")
-                        },
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 8.dp,
-                        pressedElevation = 12.dp
-                    ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("wallpaper/${Uri.encode(photo.src.original)}")
+            },
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Box {
+            Image(
+                painter = rememberAsyncImagePainter(photo.src.medium),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(20.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            // Like button
+            IconToggleButton(
+                checked = isLiked,
+                onCheckedChange = {
+                    isLiked = it
+                    LikeStorage.toggleLike(context, photo.src.original)
+                },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        shape = CircleShape
                     )
-                ) {
-                    Box {
-                        Image(
-                            painter = rememberAsyncImagePainter(photo.src.medium),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .clip(RoundedCornerShape(20.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        // Gradient overlay for better text visibility
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Black.copy(alpha = 0.3f)
-                                        )
-                                    )
-                                )
-                        )
-
-                        // Photo info overlay
-                        Surface(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = photo.photographer ?: "Unknown",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
+            ) {
+                Icon(
+                    imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Like",
+                    tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
