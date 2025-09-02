@@ -2,69 +2,22 @@
 package com.rajatt7z.creamie.screens
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,19 +29,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.rajatt7z.creamie.R
 import com.rajatt7z.creamie.api.ApiClient
 import com.rajatt7z.creamie.api.Photo
 import com.rajatt7z.creamie.data.LikeStorage
 import kotlinx.coroutines.launch
+
+// Custom fonts
+val displayFont = FontFamily(
+    Font(R.font.bebas_neue_regular, FontWeight.Normal),
+    Font(R.font.bebas_neue_bold, FontWeight.Bold)
+)
+
+val bodyFont = FontFamily(
+    Font(R.font.poppins_regular, FontWeight.Normal),
+    Font(R.font.poppins_medium, FontWeight.Medium),
+    Font(R.font.poppins_semibold, FontWeight.SemiBold)
+)
 
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
@@ -106,274 +75,290 @@ fun DashboardScreen(navController: NavController) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    rememberInfiniteTransition(label = "fab_animation")
-
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
-    val gradientBrush = Brush.horizontalGradient(
-        colors = listOf(primaryColor, secondaryColor, tertiaryColor)
-    )
-
     Scaffold(
         topBar = {
-            AnimatedVisibility(
-                visible = !isSearchActive,
-                enter = slideInVertically() + fadeIn(),
-                exit = slideOutVertically() + fadeOut()
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Creamie",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { isSearchActive = true },
+            AnimatedContent(
+                targetState = isSearchActive,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) togetherWith
+                            fadeOut(animationSpec = tween(300))
+                },
+                label = "topbar_animation"
+            ) { searchActive ->
+                if (!searchActive) {
+                    // Regular Top Bar
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shadowElevation = 2.dp
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage)
-                                }
-                            },
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                        ) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = "Refresh",
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    ),
-                    windowInsets = WindowInsets(0, 0, 0, 0)
-                )
-            }
+                            Column {
+                                Text(
+                                    "DISCOVER",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontFamily = bodyFont,
+                                        letterSpacing = 2.sp,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                                Text(
+                                    "Creamie",
+                                    style = MaterialTheme.typography.displaySmall.copy(
+                                        fontFamily = displayFont,
+                                        fontSize = 36.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                )
+                            }
 
-            // Search bar version
-            AnimatedVisibility(
-                visible = isSearchActive,
-                enter = slideInVertically() + fadeIn(),
-                exit = slideOutVertically() + fadeOut()
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(gradientBrush)
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    tonalElevation = 6.dp
-                ) {
-                    Row(
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilledIconButton(
+                                    onClick = { isSearchActive = true },
+                                    modifier = Modifier.size(48.dp),
+                                    colors = IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "Search",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+
+                                FilledTonalIconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage)
+                                        }
+                                    },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Refresh,
+                                        contentDescription = "Refresh"
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Search Bar
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        shape = RoundedCornerShape(32.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shadowElevation = 8.dp
                     ) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = {
-                                Text(
-                                    "Search beautiful images...",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            },
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .focusRequester(focusRequester),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            singleLine = true
-                        )
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
 
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = {
+                                    Text(
+                                        "Search images...",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontFamily = bodyFont
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(focusRequester),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    fontFamily = bodyFont
+                                ),
+                                singleLine = true
+                            )
+
+                            AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        searchQuery = ""
+                                        searchResults = emptyList()
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Clear,
+                                        contentDescription = "Clear",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            TextButton(
                                 onClick = {
+                                    isSearchActive = false
+                                    focusManager.clearFocus()
                                     searchQuery = ""
                                     searchResults = emptyList()
                                 }
                             ) {
-                                Icon(
-                                    Icons.Default.Clear,
-                                    contentDescription = "Clear",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                Text(
+                                    "Cancel",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontFamily = bodyFont,
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 )
                             }
-                        }
-
-                        IconButton(
-                            onClick = {
-                                isSearchActive = false
-                                focusManager.clearFocus()
-                                searchQuery = ""
-                                searchResults = emptyList()
-                            }
-                        ) {
-                            Text(
-                                "Cancel",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMedium
-                            )
                         }
                     }
                 }
             }
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                )
+                .padding(padding)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-
-                // Search Mode
-                if (isSearchActive && searchQuery.isNotEmpty()) {
-                    LaunchedEffect(searchQuery) {
-                        if (searchQuery.trim().isNotEmpty()) {
-                            try {
-                                isSearchLoading = true
-                                val response = ApiClient.api.searchPhotos(searchQuery.trim(), 20)
-                                searchResults = response.photos
-                            } catch (_: Exception) {
-                                searchResults = emptyList()
-                            } finally {
-                                isSearchLoading = false
-                            }
+            // Search Mode
+            if (isSearchActive && searchQuery.isNotEmpty()) {
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery.trim().isNotEmpty()) {
+                        try {
+                            isSearchLoading = true
+                            val response = ApiClient.api.searchPhotos(searchQuery.trim(), 20)
+                            searchResults = response.photos
+                        } catch (_: Exception) {
+                            searchResults = emptyList()
+                        } finally {
+                            isSearchLoading = false
                         }
                     }
+                }
 
-                    if (isSearchLoading) {
-                        Box(
-                            Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else {
-                        PhotoGrid(
-                            photos = searchResults,
-                            navController = navController
+                if (isSearchLoading) {
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
+                            strokeWidth = 4.dp
                         )
                     }
                 } else {
-                    // Tabs Mode
-                    AnimatedContent(
-                        targetState = !isSearchActive,
-                        transitionSpec = {
-                            slideInVertically { it } + fadeIn() togetherWith
-                                    slideOutVertically { -it } + fadeOut()
-                        },
-                        label = "tab_content"
-                    ) { showTabs ->
-                        if (showTabs) {
-                            Column {
-                                TabRow(
-                                    selectedTabIndex = pagerState.currentPage,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    indicator = { tabPositions ->
-                                        TabRowDefaults.PrimaryIndicator(
-                                            modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                            height = 4.dp,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                    PhotoGrid(
+                        photos = searchResults,
+                        navController = navController
+                    )
+                }
+            } else if (!isSearchActive) {
+                // Tabs Mode
+                Column {
+                    // Custom Tab Row
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shadowElevation = 1.dp
+                    ) {
+                        ScrollableTabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            modifier = Modifier.fillMaxWidth(),
+                            edgePadding = 16.dp,
+                            indicator = { tabPositions ->
+                                TabRowDefaults.PrimaryIndicator(
+                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                    height = 3.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                                )
+                            },
+                            divider = {}
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                val isSelected = pagerState.currentPage == index
+                                Tab(
+                                    selected = isSelected,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    },
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                ) {
+                                    val animatedScale by animateFloatAsState(
+                                        targetValue = if (isSelected) 1.05f else 1f,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        ),
+                                        label = "tab_scale"
+                                    )
+
+                                    Surface(
+                                        modifier = Modifier
+                                            .scale(animatedScale)
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        else
+                                            Color.Transparent
+                                    ) {
+                                        Text(
+                                            text = title.uppercase(),
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                fontFamily = bodyFont,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                letterSpacing = 1.sp
+                                            ),
+                                            color = if (isSelected)
+                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-                                ) {
-                                    tabs.forEachIndexed { index, title ->
-                                        Tab(
-                                            selected = pagerState.currentPage == index,
-                                            onClick = {
-                                                coroutineScope.launch {
-                                                    pagerState.animateScrollToPage(index)
-                                                }
-                                            },
-                                            modifier = Modifier.padding(vertical = 12.dp)
-                                        ) {
-                                            val isSelected = pagerState.currentPage == index
-                                            val animatedScale by animateFloatAsState(
-                                                targetValue = if (isSelected) 1.1f else 1f,
-                                                animationSpec = spring(
-                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                    stiffness = Spring.StiffnessLow
-                                                ),
-                                                label = "tab_scale"
-                                            )
-                                            Text(
-                                                text = title,
-                                                modifier = Modifier.scale(animatedScale),
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                ),
-                                                color = if (isSelected)
-                                                    MaterialTheme.colorScheme.primary
-                                                else
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-                                }
-
-                                HorizontalPager(
-                                    count = tabs.size,
-                                    state = pagerState,
-                                    modifier = Modifier.fillMaxSize()
-                                ) { page ->
-                                    TabContent(
-                                        query = tabs[page].lowercase(),
-                                        navController = navController
-                                    )
                                 }
                             }
                         }
+                    }
+
+                    HorizontalPager(
+                        count = tabs.size,
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        TabContent(
+                            query = tabs[page].lowercase(),
+                            navController = navController
+                        )
                     }
                 }
             }
@@ -409,8 +394,14 @@ private fun TabContent(
     }
 
     if (isLoading) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                strokeWidth = 4.dp
+            )
         }
     } else {
         PhotoGrid(
@@ -427,8 +418,8 @@ private fun PhotoGrid(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(20.dp),
         modifier = modifier.fillMaxSize()
     ) {
         items(photos) { photo ->
@@ -441,47 +432,156 @@ private fun PhotoGrid(
 private fun PhotoCard(photo: Photo, navController: NavController) {
     val context = LocalContext.current
     var isLiked by remember { mutableStateOf(LikeStorage.isLiked(context, photo.src.original)) }
+    var isPressed by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "card_scale"
+    )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .scale(scale)
             .clickable {
+                isPressed = true
                 navController.navigate("wallpaper/${Uri.encode(photo.src.original)}")
             },
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+            pressedElevation = 4.dp
+        )
     ) {
         Box {
+            // Main Image
             Image(
                 painter = rememberAsyncImagePainter(photo.src.medium),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
-                    .clip(RoundedCornerShape(20.dp)),
+                    .height(280.dp)
+                    .clip(RoundedCornerShape(28.dp)),
                 contentScale = ContentScale.Crop
             )
 
-            // Like button
-            IconToggleButton(
-                checked = isLiked,
-                onCheckedChange = {
-                    isLiked = it
-                    LikeStorage.toggleLike(context, photo.src.original)
-                },
+            // Gradient Overlay
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .height(280.dp)
                     .background(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                        shape = CircleShape
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.4f)
+                            ),
+                            startY = 200f
+                        )
                     )
+            )
+
+            // Top Actions Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.End
             ) {
-                Icon(
-                    imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Like",
-                    tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
+                // Like Button with Animation
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    shadowElevation = 8.dp
+                ) {
+                    IconToggleButton(
+                        checked = isLiked,
+                        onCheckedChange = {
+                            isLiked = it
+                            LikeStorage.toggleLike(context, photo.src.original)
+                        }
+                    ) {
+                        val heartScale by animateFloatAsState(
+                            targetValue = if (isLiked) 1.2f else 1f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            label = "heart_scale"
+                        )
+
+                        Icon(
+                            imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Like",
+                            tint = if (isLiked)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.scale(heartScale)
+                        )
+                    }
+                }
+            }
+
+            // Bottom Info Section
+            photo.photographer.let { photographer ->
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Photographer Avatar Placeholder
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                text = photographer.first().uppercase(),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = displayFont,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = photographer,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = bodyFont,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Photographer",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontFamily = bodyFont
+                            ),
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                }
             }
         }
     }

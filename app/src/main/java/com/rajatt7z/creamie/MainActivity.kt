@@ -14,10 +14,6 @@ import com.rajatt7z.creamie.ui.theme.CreamieTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Enable edge-to-edge but with proper Material 3 handling
-        enableEdgeToEdge()
-
         setContent {
             CreamieTheme {
                 Surface(

@@ -77,7 +77,7 @@ fun Home() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dashboard.route) { DashboardScreen(navController) }
-            composable(Screen.Profile.route) { ProfileScreen() }
+            composable(Screen.Profile.route) { ProfileScreen(navController) }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable("wallpaper/{imageUrl}") { backStackEntry ->
                 val url = backStackEntry.arguments?.getString("imageUrl") ?: ""
