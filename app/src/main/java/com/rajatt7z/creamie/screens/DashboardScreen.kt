@@ -158,7 +158,7 @@ fun DashboardScreen(navController: NavController) {
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
                         shape = RoundedCornerShape(32.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shadowElevation = 8.dp
