@@ -6,6 +6,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,15 +21,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rajatt7z.creamie.ui.theme.CreamieTheme
+import com.yourapp.ui.screens.WidgetsScreen
 
 sealed class Screen(
     val route: String,
     val icon: ImageVector,
     val label: String
 ) {
-    object Dashboard : Screen("dashboard", Icons.Default.Home,"Home")
-    object Profile : Screen("profile", Icons.Default.Person,"Profile")
-    object Settings : Screen("settings", Icons.Default.Settings,"Settings")
+    object Dashboard : Screen("dashboard", Icons.Rounded.Home,"Home")
+    object Widgets : Screen("widget" , Icons.Rounded.Star,"Widgets")
+    object Profile : Screen("profile", Icons.Rounded.Person,"Profile")
+    object Settings : Screen("settings", Icons.Rounded.Settings,"Settings")
 }
 
 @Composable
@@ -46,6 +52,7 @@ fun Home() {
 
                 listOf(
                     Screen.Dashboard,
+                    Screen.Widgets,
                     Screen.Profile,
                     Screen.Settings
                 ).forEach { screen ->
@@ -77,6 +84,7 @@ fun Home() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dashboard.route) { DashboardScreen(navController) }
+            composable(Screen.Widgets.route) { WidgetsScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable("wallpaper/{imageUrl}") { backStackEntry ->

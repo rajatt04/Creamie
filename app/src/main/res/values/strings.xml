@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Creamie</string>
+    <string name="digital_clock_widget_description">Digital Clock Widget Description</string>
 </resources>
