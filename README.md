@@ -17,13 +17,13 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 
 ## 📱 App Screenshots
 
-| Home Screen | Profile Screen |
-|-------------|----------------|
-| <img src="assets/screenshot1.png" width="200"/> | <img src="assets/screenshot2.png" width="200"/> |
+| Screenshot 1 | Screenshot 2 | Screenshot 3 |
+|--------------|--------------|--------------|
+| ![Image1](https://github.com/rajatt04/Creamie/blob/master/app/src/1.jpeg?raw=true) | ![Image2](https://github.com/rajatt04/Creamie/blob/master/app/src/2.jpeg?raw=true) | ![Image3](https://github.com/rajatt04/Creamie/blob/master/app/src/3.jpeg?raw=true) |
 
-| Settings Screen | Components Demo |
-|-----------------|-----------------|
-| <img src="assets/screenshot3.png" width="200"/> | <img src="assets/screenshot4.png" width="200"/> |
+| Screenshot 4 | Screenshot 5 | Screenshot 6 |
+|--------------|--------------|--------------|
+| ![Image4](https://github.com/rajatt04/Creamie/blob/master/app/src/4.jpeg?raw=true) | ![Image5](https://github.com/rajatt04/Creamie/blob/master/app/src/5.jpeg?raw=true) | ![Image6](https://github.com/rajatt04/Creamie/blob/master/app/src/6.jpeg?raw=true) |
 
 ---
 
