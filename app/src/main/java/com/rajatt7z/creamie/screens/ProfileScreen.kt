@@ -58,7 +58,7 @@ fun ProfileScreen(navController: NavController) {
         topBar = {
             TopAppBar(
                 title = {
-                    Column{
+                    Column {
                         Text(
                             "MY",
                             style = MaterialTheme.typography.labelMedium.copy(
@@ -80,19 +80,17 @@ fun ProfileScreen(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                 ),
-                modifier = Modifier.shadow(
-                    elevation = 2.dp,
-                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
+                modifier = Modifier
+                    .statusBarsPadding() // ✅ add just this — no other inset padding
+                    .shadow(2.dp)
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentWindowInsets = WindowInsets.systemBars
+        contentWindowInsets = WindowInsets(0,0,0,0) // ✅ removes Scaffold’s default padding
     ) { padding ->
         if (likedPhotos.isEmpty()) {
-            EmptyStateView(padding,navController)
+            EmptyStateView(padding, navController)
         } else {
             FavoritesGrid(likedPhotos, padding)
         }
