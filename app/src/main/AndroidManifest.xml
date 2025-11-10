@@ -30,11 +30,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".Widgets.ClockUpdateService"
+        <service android:name=".services.ClockUpdateService"
             android:exported="false"
             android:stopWithTask="false"/>
 
-        <receiver android:name=".Widgets.DigitalClockAppWidget"
+        <receiver android:name=".AppWidgets.DigitalClockAppWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

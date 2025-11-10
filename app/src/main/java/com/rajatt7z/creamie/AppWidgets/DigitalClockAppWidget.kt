@@ -1,12 +1,12 @@
-package com.rajatt7z.creamie.Widgets
+package com.rajatt7z.creamie.AppWidgets
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.rajatt7z.creamie.R
+import com.rajatt7z.creamie.services.ClockUpdateService
 import java.text.SimpleDateFormat
 import java.util.*
 

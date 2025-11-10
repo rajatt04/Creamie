@@ -1,17 +1,18 @@
-package com.rajatt7z.creamie.Widgets
+package com.rajatt7z.creamie.services
 
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.widget.RemoteViews
 import com.rajatt7z.creamie.R
+import com.rajatt7z.creamie.AppWidgets.DigitalClockAppWidget
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class ClockUpdateService : Service() {
 
