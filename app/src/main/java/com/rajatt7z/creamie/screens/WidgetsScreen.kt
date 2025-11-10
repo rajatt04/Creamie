@@ -1,4 +1,4 @@
-package com.yourapp.ui.screens
+package com.rajatt7z.creamie.screens
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -601,7 +601,7 @@ fun addWidgetToHomeScreen(context: Context, widgetClass: String?, widgetTitle: S
 fun getAllCategories(): List<WidgetCategory> {
     return listOf(
         WidgetCategory("Clock & Time", Icons.Default.DateRange, listOf(
-            WidgetItem("Digital Clock", "Shows current time with date", "DigitalClockAppWidget") { DigitalClockWidget() },
+            WidgetItem("Digital Clock", "Shows current time with date", "com.rajatt7z.creamie.Widgets.DigitalClockAppWidget") { DigitalClockWidget() },
             WidgetItem("Analog Clock", "Classic analog clock view", "AnalogClockAppWidget") { AnalogClockWidget() },
             WidgetItem("World Clock", "Multiple timezone support", "WorldClockAppWidget") { WorldClockWidget() },
             WidgetItem("Stopwatch", "Interactive start/stop timer", "StopwatchAppWidget") { StopwatchWidget() },

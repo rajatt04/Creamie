@@ -21,7 +21,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rajatt7z.creamie.ui.theme.CreamieTheme
-import com.yourapp.ui.screens.WidgetsScreen
 
 sealed class Screen(
     val route: String,

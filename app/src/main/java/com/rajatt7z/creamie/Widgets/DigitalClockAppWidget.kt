@@ -1,51 +1,48 @@
-package com.yourapp.widgets
+package com.rajatt7z.creamie.Widgets
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.widget.RemoteViews
 import com.rajatt7z.creamie.R
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class DigitalClockAppWidget : AppWidgetProvider() {
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        for (id in appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, id)
         }
+
+        // ✅ Start background service safely (no foreground call)
+        val serviceIntent = Intent(context, ClockUpdateService::class.java)
+        context.startService(serviceIntent)
     }
 
     override fun onEnabled(context: Context) {
-        // Widget added for first time
+        val serviceIntent = Intent(context, ClockUpdateService::class.java)
+        context.startService(serviceIntent)
     }
 
     override fun onDisabled(context: Context) {
-        // Last widget removed
+        // Stop service when last widget removed
+        val serviceIntent = Intent(context, ClockUpdateService::class.java)
+        context.stopService(serviceIntent)
     }
 }
 
-internal fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int
-) {
+internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
     val views = RemoteViews(context.packageName, R.layout.widget_digital_clock)
 
-    // Update time
-    val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    val currentTime = timeFormat.format(Date())
-    views.setTextViewText(R.id.clock_time, currentTime)
-
-    // Update date
+    val timeFormat = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
     val dateFormat = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
-    val currentDate = dateFormat.format(Date())
-    views.setTextViewText(R.id.clock_date, currentDate)
+
+    val now = Date()
+    views.setTextViewText(R.id.clock_time, timeFormat.format(now))
+    views.setTextViewText(R.id.clock_date, dateFormat.format(now))
 
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }

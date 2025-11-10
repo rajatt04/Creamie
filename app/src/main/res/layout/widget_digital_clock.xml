@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="8dp"
     android:background="@drawable/widget_background"
     android:gravity="center">
 
@@ -11,10 +11,10 @@
         android:id="@+id/clock_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="12:00"
+        android:text="12:00:00"
         android:textSize="48sp"
         android:textStyle="bold"
-        android:textColor="#1976D2"/>
+        android:textColor="?android:colorActivatedHighlight"/>
 
     <TextView
         android:id="@+id/clock_date"
@@ -22,7 +22,6 @@
         android:layout_height="wrap_content"
         android:text="Monday, Nov 9"
         android:textSize="14sp"
-        android:textColor="#666666"
-        android:layout_marginTop="4dp"/>
+        android:textColor="?android:colorControlActivated"/>
 
 </LinearLayout>

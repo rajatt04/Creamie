@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
-
-
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -29,10 +30,15 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".Widgets.ClockUpdateService"
+            android:exported="false"
+            android:stopWithTask="false"/>
+
         <receiver android:name=".Widgets.DigitalClockAppWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.rajatt7z.creamie.ACTION_UPDATE_TIME" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
