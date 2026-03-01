@@ -1,8 +1,8 @@
 package com.rajatt7z.creamie.data.mapper
 
-import com.rajatt7z.creamie.data.local.entity.FavoriteEntity
+import com.rajatt7z.creamie.data.local.entity.WallpaperEntity
 import com.rajatt7z.creamie.data.remote.dto.PhotoDto
-import com.rajatt7z.creamie.data.remote.dto.PhotoSrcDto
+import com.rajatt7z.creamie.data.remote.dto.SrcDto
 import com.rajatt7z.creamie.data.remote.dto.CollectionDto
 import org.junit.Assert.*
 import org.junit.Test
@@ -20,7 +20,7 @@ class MappersTest {
             photographerUrl = "https://pexels.com/@jane",
             photographerId = 99,
             avgColor = "#FF5500",
-            src = PhotoSrcDto(
+            src = SrcDto(
                 original = "original.jpg",
                 large2x = "large2x.jpg",
                 large = "large.jpg",
@@ -50,11 +50,12 @@ class MappersTest {
     }
 
     @Test
-    fun `FavoriteEntity toDomain maps correctly`() {
-        val entity = FavoriteEntity(
-            photoId = 100,
+    fun `WallpaperEntity toDomain maps correctly`() {
+        val entity = WallpaperEntity(
+            id = 100,
             photographer = "Alex",
             photographerUrl = "https://pexels.com/@alex",
+            photographerId = 123L,
             avgColor = "#000000",
             srcOriginal = "orig.jpg",
             srcLarge2x = "l2x.jpg",
@@ -66,7 +67,11 @@ class MappersTest {
             srcTiny = "t.jpg",
             alt = "Dark photo",
             width = 1080,
-            height = 1920
+            height = 1920,
+            url = "url",
+            liked = true,
+            queryOrCategory = "curated",
+            cachedAt = 0L
         )
 
         val domain = entity.toDomain()
@@ -80,7 +85,7 @@ class MappersTest {
     }
 
     @Test
-    fun `Photo toFavoriteEntity maps correctly`() {
+    fun `PhotoDto toEntity maps correctly`() {
         val dto = PhotoDto(
             id = 200,
             width = 800,
@@ -90,7 +95,7 @@ class MappersTest {
             photographerUrl = "boburl",
             photographerId = 10,
             avgColor = "#112233",
-            src = PhotoSrcDto(
+            src = SrcDto(
                 original = "o", large2x = "l2x", large = "l",
                 medium = "m", small = "s",
                 portrait = "p", landscape = "ls", tiny = "t"
@@ -99,13 +104,13 @@ class MappersTest {
             liked = false
         )
 
-        val domain = dto.toDomain()
-        val entity = domain.toFavoriteEntity()
+        val entity = dto.toEntity("nature")
 
-        assertEquals(200, entity.photoId)
+        assertEquals(200, entity.id)
         assertEquals("Bob", entity.photographer)
         assertEquals("o", entity.srcOriginal)
         assertEquals("#112233", entity.avgColor)
+        assertEquals("nature", entity.queryOrCategory)
     }
 
     @Test

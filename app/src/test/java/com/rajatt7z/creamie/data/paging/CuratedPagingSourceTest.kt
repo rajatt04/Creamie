@@ -29,7 +29,7 @@ class CuratedPagingSourceTest {
         photographerUrl = "https://pexels.com/@test",
         photographerId = 100,
         avgColor = "#AABBCC",
-        src = PhotoSrcDto(
+        src = SrcDto(
             original = "https://images.pexels.com/1/original.jpg",
             large2x = "https://images.pexels.com/1/large2x.jpg",
             large = "https://images.pexels.com/1/large.jpg",
@@ -51,14 +51,14 @@ class CuratedPagingSourceTest {
 
     @Test
     fun `load returns page data on success`() = runTest {
-        val photosResponse = PhotosResponseDto(
+        val photosResponse = PhotoResponseDto(
             totalResults = 1,
             page = 1,
             perPage = 15,
             photos = listOf(mockPhotoDto),
             nextPage = "https://api.pexels.com/v1/curated?page=2&per_page=15"
         )
-        coEvery { apiService.getCuratedPhotos(page = 1, perPage = 15) } returns Response.success(photosResponse)
+        coEvery { apiService.getCuratedPhotos(page = 1, perPage = 15) } returns photosResponse
 
         val result = pagingSource.load(
             PagingSource.LoadParams.Refresh(
@@ -93,14 +93,14 @@ class CuratedPagingSourceTest {
 
     @Test
     fun `load returns null nextKey when no next page`() = runTest {
-        val photosResponse = PhotosResponseDto(
+        val photosResponse = PhotoResponseDto(
             totalResults = 1,
             page = 1,
             perPage = 15,
             photos = listOf(mockPhotoDto),
             nextPage = null
         )
-        coEvery { apiService.getCuratedPhotos(page = 1, perPage = 15) } returns Response.success(photosResponse)
+        coEvery { apiService.getCuratedPhotos(page = 1, perPage = 15) } returns photosResponse
 
         val result = pagingSource.load(
             PagingSource.LoadParams.Refresh(

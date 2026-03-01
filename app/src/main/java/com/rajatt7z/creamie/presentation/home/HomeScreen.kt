@@ -44,25 +44,25 @@ fun HomeScreen(
 ) {
     val pagingItems = viewModel.curatedPhotos.collectAsLazyPagingItems()
     val uiState by viewModel.uiState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
+            TopAppBar(
                 title = {
-                    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+                    Column(modifier = Modifier.padding(bottom = 4.dp)) {
                         Text(
                             "DISCOVER",
-                            style = MaterialTheme.typography.labelMedium.copy(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 letterSpacing = 3.sp,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
                             )
                         )
                         Text(
-                            "Creamie",
-                            style = MaterialTheme.typography.displayLarge.copy(
+                            "CREAMIE",
+                            style = MaterialTheme.typography.displayMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         )
@@ -74,12 +74,12 @@ fun HomeScreen(
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(44.dp)
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(22.dp))
                     }
                 },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
