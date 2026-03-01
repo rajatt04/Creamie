@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.rajatt7z.creamie.core.common.Constants
 
@@ -49,9 +48,9 @@ fun DetailScreen(
 
     // Heart animation
     val heartScale by animateFloatAsState(
-        targetValue = if (uiState.isFavorite) 1.3f else 1f,
+        targetValue = if (uiState.isFavorite) 1.5f else 1f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
+            dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ),
         label = "heart_scale"
@@ -88,16 +87,50 @@ fun DetailScreen(
     val photo = uiState.photo ?: return
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    // Favorite
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Full-screen image
+            AsyncImage(
+                model = photo.src.large2x,
+                contentDescription = photo.alt,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                onSuccess = { result ->
+                    val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
+                    bitmap?.let { viewModel.extractColors(it) }
+                }
+            )
+
+            // Top Action Pills
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Back Button
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), CircleShape)
+                        .size(48.dp)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                }
+
+                // Actions Pill
+                Row(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(24.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     IconButton(onClick = viewModel::toggleFavorite) {
                         Icon(
                             imageVector = if (uiState.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -106,7 +139,6 @@ fun DetailScreen(
                             modifier = Modifier.scale(heartScale)
                         )
                     }
-                    // Share
                     IconButton(onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -114,52 +146,22 @@ fun DetailScreen(
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "Share Wallpaper"))
                     }) {
-                        Icon(Icons.Default.Share, contentDescription = "Share")
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Full-width image
-            val painter = rememberAsyncImagePainter(photo.src.large2x)
-            val painterState = painter.state
-
-            AsyncImage(
-                model = photo.src.large2x,
-                contentDescription = photo.alt,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
-                contentScale = ContentScale.Crop,
-                onSuccess = { result ->
-                    val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
-                    bitmap?.let { viewModel.extractColors(it) }
                 }
-            )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Photographer card
-            Card(
+            // Bottom Glassmorphic Panel
+            Column(
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                    .clip(RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
+                    .navigationBarsPadding()
+                    .padding(horizontal = 32.dp, vertical = 32.dp)
             ) {
+                // Photographer info
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,140 +169,147 @@ fun DetailScreen(
                             if (photo.photographerUrl.isNotEmpty()) {
                                 uriHandler.openUri(photo.photographerUrl)
                             }
-                        }
-                        .padding(16.dp),
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(56.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 photo.photographer.firstOrNull()?.uppercase() ?: "?",
-                                style = MaterialTheme.typography.titleMedium.copy(
+                                style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimary
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             photo.photographer,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
                         Text(
-                            "View on Pexels →",
-                            style = MaterialTheme.typography.bodySmall,
+                            "View on Pexels \u2192",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    Text(
-                        "${photo.width} × ${photo.height}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Color palette
-            if (uiState.colorPalette.isNotEmpty()) {
-                Text(
-                    "Color Palette",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                // Scrollable attributes (Colors and Quality)
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
-                    items(uiState.colorPalette) { colorInt ->
-                        Surface(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clickable {
-                                    val hex = String.format("%06X", 0xFFFFFF and colorInt)
-                                    onColorSearch(hex)
-                                },
-                            shape = CircleShape,
-                            color = Color(colorInt),
-                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                        ) {}
+                    // Colors
+                    if (uiState.colorPalette.isNotEmpty()) {
+                        item {
+                            Column {
+                                Text(
+                                    "Extracted Colors",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    uiState.colorPalette.take(4).forEach { colorInt ->
+                                        Surface(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clickable {
+                                                    val hex = String.format("%06X", 0xFFFFFF and colorInt)
+                                                    onColorSearch(hex)
+                                                },
+                                            shape = CircleShape,
+                                            color = Color(colorInt),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                        ) {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Quality
+                    item {
+                        Column {
+                            Text(
+                                "Download Size",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Constants.QUALITY_OPTIONS.forEach { quality ->
+                                    val selected = uiState.selectedQuality == quality
+                                    Surface(
+                                        modifier = Modifier.clickable { viewModel.setSelectedQuality(quality) },
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                    ) {
+                                        Text(
+                                            quality.replaceFirstChar { it.uppercase() },
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Main Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        onClick = viewModel::downloadWallpaper,
+                        modifier = Modifier.weight(1f).height(64.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        ),
+                        enabled = !uiState.isDownloading
+                    ) {
+                        if (uiState.isDownloading) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(20.dp))
+                        }
+                    }
+
+                    Button(
+                        onClick = viewModel::showWallpaperDialog,
+                        modifier = Modifier.weight(3f).height(64.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        enabled = !uiState.isSettingWallpaper
+                    ) {
+                        if (uiState.isSettingWallpaper) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Icon(Icons.Default.Wallpaper, contentDescription = null, modifier = Modifier.size(24.dp))
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Set Wallpaper", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Quality selector
-            Text(
-                "Download Quality",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(Constants.QUALITY_OPTIONS) { quality ->
-                    FilterChip(
-                        selected = uiState.selectedQuality == quality,
-                        onClick = { viewModel.setSelectedQuality(quality) },
-                        label = { Text(quality.replaceFirstChar { it.uppercase() }) }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Action buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = viewModel::downloadWallpaper,
-                    modifier = Modifier.weight(1f),
-                    enabled = !uiState.isDownloading
-                ) {
-                    if (uiState.isDownloading) {
-                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                    } else {
-                        Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Download")
-                }
-
-                Button(
-                    onClick = viewModel::showWallpaperDialog,
-                    modifier = Modifier.weight(1f),
-                    enabled = !uiState.isSettingWallpaper
-                ) {
-                    if (uiState.isSettingWallpaper) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(Icons.Default.Wallpaper, contentDescription = null, modifier = Modifier.size(18.dp))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Set Wallpaper")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
@@ -310,50 +319,43 @@ fun DetailScreen(
             onDismissRequest = viewModel::dismissWallpaperDialog
         ) {
             Surface(
-                shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 6.dp
+                shape = RoundedCornerShape(40.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 12.dp
             ) {
                 Column(
-                    modifier = Modifier.padding(vertical = 24.dp),
+                    modifier = Modifier.padding(vertical = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Header icon
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                CircleShape
-                            ),
+                            .size(72.dp)
+                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Wallpaper,
                             contentDescription = null,
-                            modifier = Modifier.size(28.dp),
+                            modifier = Modifier.size(36.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
                         "Set Wallpaper",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        )
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Choose where to apply",
-                        style = MaterialTheme.typography.bodySmall,
+                        "Where would you like to apply it?",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                    // Option: Home Screen
                     WallpaperOptionRow(
                         icon = Icons.Default.Home,
                         title = "Home Screen",
@@ -363,12 +365,6 @@ fun DetailScreen(
                         onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM) }
                     )
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
-
-                    // Option: Lock Screen
                     WallpaperOptionRow(
                         icon = Icons.Default.Lock,
                         title = "Lock Screen",
@@ -378,12 +374,6 @@ fun DetailScreen(
                         onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_LOCK) }
                     )
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
-
-                    // Option: Both Screens
                     WallpaperOptionRow(
                         icon = Icons.Default.PhoneAndroid,
                         title = "Both Screens",
@@ -393,16 +383,15 @@ fun DetailScreen(
                         onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK) }
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                    // Cancel
                     TextButton(
                         onClick = viewModel::dismissWallpaperDialog,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     ) {
                         Text(
                             "Cancel",
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 }
@@ -424,35 +413,35 @@ private fun WallpaperOptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 14.dp),
+            .padding(horizontal = 32.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(48.dp)
                 .background(iconBgColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(24.dp),
                 tint = iconTint
             )
         }
 
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(20.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 title,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
                 )
             )
             Text(
                 subtitle,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -460,7 +449,7 @@ private fun WallpaperOptionRow(
         Icon(
             Icons.Default.ChevronRight,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }

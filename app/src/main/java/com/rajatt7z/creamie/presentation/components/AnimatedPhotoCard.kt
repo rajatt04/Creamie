@@ -43,7 +43,7 @@ fun AnimatedPhotoCard(
     val animatedScale by animateFloatAsState(
         targetValue = if (visible) 1f else 0.8f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
+            dampingRatio = Spring.DampingRatioHighBouncy,
             stiffness = Spring.StiffnessLow
         ),
         label = "card_scale"
@@ -63,7 +63,7 @@ fun AnimatedPhotoCard(
     val pressScale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
+            dampingRatio = Spring.DampingRatioHighBouncy,
             stiffness = Spring.StiffnessMedium
         ),
         label = "press_scale"
@@ -78,7 +78,7 @@ fun AnimatedPhotoCard(
                 scaleY = animatedScale * pressScale
                 alpha = animatedAlpha
             }
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(32.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null

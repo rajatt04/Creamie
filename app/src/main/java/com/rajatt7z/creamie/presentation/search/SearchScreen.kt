@@ -28,6 +28,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.core.common.Constants
+import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +73,13 @@ fun SearchScreen(
                 },
                 expanded = false,
                 onExpandedChange = {},
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = SearchBarDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
             ) {}
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -110,49 +117,11 @@ fun SearchScreen(
                         key = { pagingItems[it]?.id ?: it }
                     ) { index ->
                         pagingItems[index]?.let { photo ->
-                            val aspectRatio = photo.width.toFloat() / photo.height.toFloat()
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onPhotoClick(photo.id) },
-                                shape = RoundedCornerShape(16.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                            ) {
-                                Box {
-                                    AsyncImage(
-                                        model = photo.src.medium,
-                                        contentDescription = photo.alt,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .aspectRatio(aspectRatio.coerceIn(0.5f, 1.5f))
-                                            .clip(RoundedCornerShape(16.dp)),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                    // Bottom gradient with photographer
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(40.dp)
-                                            .align(Alignment.BottomCenter)
-                                            .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
-                                            .then(
-                                                Modifier.background(
-                                                    Brush.verticalGradient(
-                                                        listOf(Color.Transparent, Color.Black.copy(0.4f))
-                                                    )
-                                                )
-                                            )
-                                    )
-                                    Text(
-                                        photo.photographer,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color.White,
-                                        modifier = Modifier
-                                            .align(Alignment.BottomStart)
-                                            .padding(8.dp)
-                                    )
-                                }
-                            }
+                            AnimatedPhotoCard(
+                                photo = photo,
+                                index = index,
+                                onClick = { onPhotoClick(photo.id) }
+                            )
                         }
                     }
 
@@ -270,107 +239,122 @@ private fun FilterBottomSheet(
     var size by remember { mutableStateOf(currentFilters.size) }
     var color by remember { mutableStateOf(currentFilters.color) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
+                .padding(horizontal = 32.dp, vertical = 24.dp)
         ) {
             Text(
                 "Search Filters",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold)
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Orientation
-            Text("Orientation", style = MaterialTheme.typography.titleSmall)
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Orientation", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
+            Spacer(modifier = Modifier.height(12.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
                     FilterChip(
                         selected = orientation == null,
                         onClick = { orientation = null },
-                        label = { Text("Any") }
+                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
                 items(Constants.PEXELS_ORIENTATIONS) { opt ->
                     FilterChip(
                         selected = orientation == opt,
                         onClick = { orientation = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }) }
+                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Size
-            Text("Size", style = MaterialTheme.typography.titleSmall)
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Size", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
+            Spacer(modifier = Modifier.height(12.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
                     FilterChip(
                         selected = size == null,
                         onClick = { size = null },
-                        label = { Text("Any") }
+                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
                 items(Constants.PEXELS_SIZES) { opt ->
                     FilterChip(
                         selected = size == opt,
                         onClick = { size = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }) }
+                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Color
-            Text("Color", style = MaterialTheme.typography.titleSmall)
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Color", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
+            Spacer(modifier = Modifier.height(12.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
                     FilterChip(
                         selected = color == null,
                         onClick = { color = null },
-                        label = { Text("Any") }
+                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
                 items(Constants.PEXELS_COLORS) { opt ->
                     FilterChip(
                         selected = color == opt,
                         onClick = { color = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }) }
+                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
                     onClick = {
                         onApply(SearchFilters())
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    shape = RoundedCornerShape(28.dp)
                 ) {
-                    Text("Reset")
+                    Text("Reset", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
                 Button(
                     onClick = {
                         onApply(SearchFilters(orientation, size, color))
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    shape = RoundedCornerShape(28.dp)
                 ) {
-                    Text("Apply")
+                    Text("Apply Filters", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

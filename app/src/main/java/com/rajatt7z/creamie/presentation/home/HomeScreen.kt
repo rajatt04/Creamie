@@ -24,12 +24,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.domain.model.Collection
 import com.rajatt7z.creamie.domain.model.Photo
+import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,24 +44,26 @@ fun HomeScreen(
 ) {
     val pagingItems = viewModel.curatedPhotos.collectAsLazyPagingItems()
     val uiState by viewModel.uiState.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 title = {
-                    Column {
+                    Column(modifier = Modifier.padding(bottom = 8.dp)) {
                         Text(
                             "DISCOVER",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                letterSpacing = 2.sp,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                letterSpacing = 3.sp,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                         )
                         Text(
                             "Creamie",
-                            style = MaterialTheme.typography.displaySmall.copy(
-                                fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         )
                     }
@@ -69,14 +73,17 @@ fun HomeScreen(
                         onClick = onSearchClick,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                        ),
+                        modifier = Modifier.size(48.dp)
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
+                        Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(24.dp))
                     }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                scrollBehavior = scrollBehavior
             )
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -132,8 +139,9 @@ fun HomeScreen(
                 key = { pagingItems[it]?.id ?: it }
             ) { index ->
                 pagingItems[index]?.let { photo ->
-                    PhotoGridCard(
+                    AnimatedPhotoCard(
                         photo = photo,
+                        index = index,
                         onClick = { onPhotoClick(photo.id) }
                     )
                 }
@@ -165,63 +173,7 @@ fun HomeScreen(
     }
 }
 
-@Composable
-private fun PhotoGridCard(
-    photo: Photo,
-    onClick: () -> Unit
-) {
-    // Dynamic height based on aspect ratio
-    val aspectRatio = photo.width.toFloat() / photo.height.toFloat()
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box {
-            AsyncImage(
-                model = photo.src.medium,
-                contentDescription = photo.alt.ifEmpty { "Wallpaper by ${photo.photographer}" },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(aspectRatio.coerceIn(0.5f, 1.5f))
-                    .clip(RoundedCornerShape(20.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            // Gradient overlay at bottom
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .align(Alignment.BottomCenter)
-                    .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                    .then(
-                        Modifier.background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))
-                            )
-                        )
-                    )
-            )
-
-            // Photographer name
-            Text(
-                text = photo.photographer,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
-                ),
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp)
-            )
-        }
-    }
-}
-
+// (PhotoGridCard removed because we are using AnimatedPhotoCard now)
 @Composable
 private fun TrendingSearchChips(
     searches: List<String>,
@@ -249,39 +201,57 @@ private fun FeaturedCollectionsRow(
     Column {
         Text(
             "Featured Collections",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(vertical = 8.dp)
         )
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(collections, key = { it.id }) { collection ->
                 Card(
                     modifier = Modifier
-                        .width(180.dp)
-                        .height(100.dp)
+                        .width(220.dp)
+                        .height(130.dp)
                         .clickable { onCollectionClick(collection.id) },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
                     )
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        contentAlignment = Alignment.BottomStart
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        Column {
+                        // Background gradient
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary.copy(alpha=0.2f),
+                                            MaterialTheme.colorScheme.secondary.copy(alpha=0.4f)
+                                        )
+                                    )
+                                )
+                        )
+                        
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(20.dp),
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
                             Text(
                                 collection.title,
-                                style = MaterialTheme.typography.titleSmall.copy(
+                                style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
-                                maxLines = 1
+                                maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 "${collection.photosCount} photos",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
                             )
                         }
                     }

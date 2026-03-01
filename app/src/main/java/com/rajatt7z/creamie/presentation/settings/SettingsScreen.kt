@@ -1,10 +1,10 @@
 package com.rajatt7z.creamie.presentation.settings
 
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,11 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rajatt7z.creamie.core.common.Constants
 import com.rajatt7z.creamie.data.local.datastore.ThemeMode
@@ -30,19 +33,25 @@ fun SettingsScreen(
 ) {
     val preferences by viewModel.preferences.collectAsState()
     val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
                     Text(
                         "Settings",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.displayLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
-                }
+                },
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                scrollBehavior = scrollBehavior
             )
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -56,42 +65,43 @@ fun SettingsScreen(
             // Appearance
             SettingsSectionHeader("Appearance")
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
                 Column {
-                    // Theme mode
                     var showThemeDialog by remember { mutableStateOf(false) }
-                    ListItem(
-                        headlineContent = { Text("Theme") },
-                        supportingContent = {
-                            Text(
-                                when (preferences.themeMode) {
-                                    ThemeMode.LIGHT -> "Light"
-                                    ThemeMode.DARK -> "Dark"
-                                    ThemeMode.SYSTEM -> "System Default"
-                                }
-                            )
+                    SettingsListItem(
+                        headline = "Theme",
+                        supporting = when (preferences.themeMode) {
+                            ThemeMode.LIGHT -> "Light"
+                            ThemeMode.DARK -> "Dark"
+                            ThemeMode.SYSTEM -> "System Default"
                         },
-                        leadingContent = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
+                        icon = Icons.Outlined.DarkMode,
+                        iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.clickable { showThemeDialog = true }
                     )
 
                     if (showThemeDialog) {
                         AlertDialog(
                             onDismissRequest = { showThemeDialog = false },
-                            title = { Text("Choose Theme") },
+                            title = { Text("Choose Theme", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                             text = {
                                 Column {
                                     ThemeMode.entries.forEach { mode ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .clip(RoundedCornerShape(16.dp))
                                                 .clickable {
                                                     viewModel.setThemeMode(mode)
                                                     showThemeDialog = false
                                                 }
-                                                .padding(vertical = 12.dp),
+                                                .padding(vertical = 12.dp, horizontal = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             RadioButton(
@@ -101,13 +111,14 @@ fun SettingsScreen(
                                                     showThemeDialog = false
                                                 }
                                             )
-                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Spacer(modifier = Modifier.width(12.dp))
                                             Text(
                                                 when (mode) {
                                                     ThemeMode.LIGHT -> "Light"
                                                     ThemeMode.DARK -> "Dark"
                                                     ThemeMode.SYSTEM -> "System Default"
-                                                }
+                                                },
+                                                style = MaterialTheme.typography.titleMedium
                                             )
                                         }
                                     }
@@ -119,38 +130,44 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Download & Quality
             SettingsSectionHeader("Downloads")
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
                 Column {
                     var showQualityDialog by remember { mutableStateOf(false) }
-                    ListItem(
-                        headlineContent = { Text("Default Quality") },
-                        supportingContent = { Text(preferences.defaultQuality.replaceFirstChar { it.uppercase() }) },
-                        leadingContent = { Icon(Icons.Outlined.HighQuality, contentDescription = null) },
+                    SettingsListItem(
+                        headline = "Default Quality",
+                        supporting = preferences.defaultQuality.replaceFirstChar { it.uppercase() },
+                        icon = Icons.Outlined.HighQuality,
+                        iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.clickable { showQualityDialog = true }
                     )
 
                     if (showQualityDialog) {
                         AlertDialog(
                             onDismissRequest = { showQualityDialog = false },
-                            title = { Text("Default Download Quality") },
+                            title = { Text("Download Quality", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                             text = {
                                 Column {
                                     Constants.QUALITY_OPTIONS.forEach { quality ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .clip(RoundedCornerShape(16.dp))
                                                 .clickable {
                                                     viewModel.setDefaultQuality(quality)
                                                     showQualityDialog = false
                                                 }
-                                                .padding(vertical = 12.dp),
+                                                .padding(vertical = 12.dp, horizontal = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             RadioButton(
@@ -160,8 +177,11 @@ fun SettingsScreen(
                                                     showQualityDialog = false
                                                 }
                                             )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(quality.replaceFirstChar { it.uppercase() })
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                quality.replaceFirstChar { it.uppercase() },
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
                                         }
                                     }
                                 }
@@ -172,106 +192,136 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Storage
             SettingsSectionHeader("Storage")
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
-                ListItem(
-                    headlineContent = { Text("Clear Cache") },
-                    supportingContent = { Text("Clear image and data cache") },
-                    leadingContent = { Icon(Icons.Outlined.CleaningServices, contentDescription = null) },
+                SettingsListItem(
+                    headline = "Clear Cache",
+                    supporting = "Clear image and data cache",
+                    icon = Icons.Outlined.CleaningServices,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTintColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.clickable { viewModel.clearCache() }
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // API Usage
             SettingsSectionHeader("API Usage")
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(24.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("This hour", style = MaterialTheme.typography.bodyMedium)
+                        Text("This hour", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
                         Text(
                             "${preferences.apiRequestsUsedThisHour} / ${preferences.apiRateLimitPerHour}",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     LinearProgressIndicator(
                         progress = {
                             (preferences.apiRequestsUsedThisHour.toFloat() / preferences.apiRateLimitPerHour)
                                 .coerceIn(0f, 1f)
                         },
-                        modifier = Modifier.fillMaxWidth().height(8.dp),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("This month", style = MaterialTheme.typography.bodyMedium)
+                        Text("This month", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
                         Text(
                             "${preferences.totalApiRequestsThisMonth} / ${Constants.RATE_LIMIT_PER_MONTH}",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     LinearProgressIndicator(
                         progress = {
                             (preferences.totalApiRequestsThisMonth.toFloat() / Constants.RATE_LIMIT_PER_MONTH)
                                 .coerceIn(0f, 1f)
                         },
-                        modifier = Modifier.fillMaxWidth().height(8.dp),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // About
             SettingsSectionHeader("About")
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
                 Column {
-                    ListItem(
-                        headlineContent = { Text("App Version") },
-                        supportingContent = { Text("1.0.0") },
-                        leadingContent = { Icon(Icons.Outlined.Info, contentDescription = null) }
+                    SettingsListItem(
+                        headline = "App Version",
+                        supporting = "1.0.0",
+                        icon = Icons.Outlined.Info,
+                        iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                    ListItem(
-                        headlineContent = { Text("Source Code") },
-                        supportingContent = { Text("View on GitHub") },
-                        leadingContent = { Icon(Icons.Outlined.Code, contentDescription = null) },
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    SettingsListItem(
+                        headline = "Source Code",
+                        supporting = "View on GitHub",
+                        icon = Icons.Outlined.Code,
+                        iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.clickable {
                             uriHandler.openUri("https://github.com/rajatt04/Creamie")
                         }
                     )
-                    ListItem(
-                        headlineContent = { Text("Privacy Policy") },
-                        leadingContent = { Icon(Icons.Outlined.PrivacyTip, contentDescription = null) },
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    SettingsListItem(
+                        headline = "Privacy Policy",
+                        icon = Icons.Outlined.PrivacyTip,
+                        iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.clickable {
                             uriHandler.openUri("https://github.com/rajatt04/Creamie")
                         }
                     )
-                    ListItem(
-                        headlineContent = { Text("Licenses") },
-                        supportingContent = { Text("Open source licenses") },
-                        leadingContent = { Icon(Icons.Outlined.Description, contentDescription = null) },
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    SettingsListItem(
+                        headline = "Licenses",
+                        supporting = "Open source licenses",
+                        icon = Icons.Outlined.Description,
+                        iconBgColor = MaterialTheme.colorScheme.surfaceVariant,
+                        iconTintColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.clickable {
                             uriHandler.openUri("https://github.com/rajatt04/Creamie?tab=readme-ov-file#-license")
                         }
@@ -279,7 +329,7 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
         }
     }
 }
@@ -288,10 +338,46 @@ fun SettingsScreen(
 private fun SettingsSectionHeader(title: String) {
     Text(
         title,
-        style = MaterialTheme.typography.labelLarge.copy(
+        style = MaterialTheme.typography.titleMedium.copy(
             color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Bold
         ),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(start = 40.dp, end = 24.dp, top = 8.dp, bottom = 12.dp)
+    )
+}
+
+@Composable
+private fun SettingsListItem(
+    headline: String,
+    supporting: String? = null,
+    icon: ImageVector,
+    iconBgColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    iconTintColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    modifier: Modifier = Modifier
+) {
+    ListItem(
+        headlineContent = {
+            Text(headline, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+        },
+        supportingContent = supporting?.let {
+            { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(iconBgColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = iconTintColor, modifier = Modifier.size(24.dp))
+            }
+        },
+        trailingContent = {
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
+        ),
+        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
     )
 }

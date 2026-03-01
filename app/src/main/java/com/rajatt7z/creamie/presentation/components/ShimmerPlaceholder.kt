@@ -41,7 +41,7 @@ fun ShimmerPlaceholder(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(brush)
     )
 }
