@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="search_wallpapers"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_search"
+        android:shortcutShortLabel="@string/shortcut_search"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.rajatt7z.creamie"
+            android:targetClass="com.rajatt7z.creamie.MainActivity"
+            android:data="creamie://search" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="favorites"
+        android:enabled="true"
+        android:icon="@android:drawable/btn_star_big_on"
+        android:shortcutShortLabel="@string/shortcut_favorites"
+        android:shortcutLongLabel="@string/shortcut_favorites_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.rajatt7z.creamie"
+            android:targetClass="com.rajatt7z.creamie.MainActivity"
+            android:data="creamie://favorites" />
+    </shortcut>
+</shortcuts>

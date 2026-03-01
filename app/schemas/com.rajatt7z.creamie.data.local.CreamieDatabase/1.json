@@ -1,0 +1,422 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "99b30475d445815e1396ba9406de91f4",
+    "entities": [
+      {
+        "tableName": "wallpapers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `url` TEXT NOT NULL, `photographer` TEXT NOT NULL, `photographerUrl` TEXT NOT NULL, `photographerId` INTEGER NOT NULL, `avgColor` TEXT, `srcOriginal` TEXT NOT NULL, `srcLarge2x` TEXT NOT NULL, `srcLarge` TEXT NOT NULL, `srcMedium` TEXT NOT NULL, `srcSmall` TEXT NOT NULL, `srcPortrait` TEXT NOT NULL, `srcLandscape` TEXT NOT NULL, `srcTiny` TEXT NOT NULL, `liked` INTEGER NOT NULL, `alt` TEXT NOT NULL, `queryOrCategory` TEXT NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographer",
+            "columnName": "photographer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographerUrl",
+            "columnName": "photographerUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographerId",
+            "columnName": "photographerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avgColor",
+            "columnName": "avgColor",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "srcOriginal",
+            "columnName": "srcOriginal",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcLarge2x",
+            "columnName": "srcLarge2x",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcLarge",
+            "columnName": "srcLarge",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcMedium",
+            "columnName": "srcMedium",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcSmall",
+            "columnName": "srcSmall",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcPortrait",
+            "columnName": "srcPortrait",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcLandscape",
+            "columnName": "srcLandscape",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcTiny",
+            "columnName": "srcTiny",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "liked",
+            "columnName": "liked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alt",
+            "columnName": "alt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "queryOrCategory",
+            "columnName": "queryOrCategory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cachedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "collections",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `isPrivate` INTEGER NOT NULL, `mediaCount` INTEGER NOT NULL, `photosCount` INTEGER NOT NULL, `videosCount` INTEGER NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isPrivate",
+            "columnName": "isPrivate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaCount",
+            "columnName": "mediaCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photosCount",
+            "columnName": "photosCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "videosCount",
+            "columnName": "videosCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cachedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "favorites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `photographer` TEXT NOT NULL, `photographerUrl` TEXT NOT NULL, `avgColor` TEXT, `srcOriginal` TEXT NOT NULL, `srcLarge2x` TEXT NOT NULL, `srcMedium` TEXT NOT NULL, `srcSmall` TEXT NOT NULL, `srcTiny` TEXT NOT NULL, `alt` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`photoId`))",
+        "fields": [
+          {
+            "fieldPath": "photoId",
+            "columnName": "photoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographer",
+            "columnName": "photographer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographerUrl",
+            "columnName": "photographerUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avgColor",
+            "columnName": "avgColor",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "srcOriginal",
+            "columnName": "srcOriginal",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcLarge2x",
+            "columnName": "srcLarge2x",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcMedium",
+            "columnName": "srcMedium",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcSmall",
+            "columnName": "srcSmall",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "srcTiny",
+            "columnName": "srcTiny",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alt",
+            "columnName": "alt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "photoId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "search_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`query` TEXT NOT NULL, `searchedAt` INTEGER NOT NULL, PRIMARY KEY(`query`))",
+        "fields": [
+          {
+            "fieldPath": "query",
+            "columnName": "query",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "searchedAt",
+            "columnName": "searchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "query"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "download_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `photoId` INTEGER NOT NULL, `photographer` TEXT NOT NULL, `filePath` TEXT NOT NULL, `quality` TEXT NOT NULL, `fileSize` INTEGER NOT NULL, `downloadedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photoId",
+            "columnName": "photoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photographer",
+            "columnName": "photographer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "filePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quality",
+            "columnName": "quality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileSize",
+            "columnName": "fileSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadedAt",
+            "columnName": "downloadedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "remote_keys",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`queryOrCategory` TEXT NOT NULL, `nextPage` INTEGER, `prevPage` INTEGER, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`queryOrCategory`))",
+        "fields": [
+          {
+            "fieldPath": "queryOrCategory",
+            "columnName": "queryOrCategory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextPage",
+            "columnName": "nextPage",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "prevPage",
+            "columnName": "prevPage",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "queryOrCategory"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '99b30475d445815e1396ba9406de91f4')"
+    ]
+  }
+}

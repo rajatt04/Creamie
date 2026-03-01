@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Creamie</string>
     <string name="digital_clock_widget_description">Digital Clock Widget Description</string>
+    <string name="shortcut_search">Search</string>
+    <string name="shortcut_search_long">Search Wallpapers</string>
+    <string name="shortcut_favorites">Favorites</string>
+    <string name="shortcut_favorites_long">My Favorites</string>
+    <string name="wotd_widget_description">Shows a fresh wallpaper every day</string>
 </resources>
