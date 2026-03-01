@@ -306,43 +306,162 @@ fun DetailScreen(
 
     // Set Wallpaper dialog
     if (uiState.showWallpaperDialog) {
-        AlertDialog(
-            onDismissRequest = viewModel::dismissWallpaperDialog,
-            title = { Text("Set Wallpaper") },
-            text = { Text("Choose where to apply this wallpaper") },
-            confirmButton = {
-                Column {
-                    TextButton(
-                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM) },
-                        modifier = Modifier.fillMaxWidth()
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = viewModel::dismissWallpaperDialog
+        ) {
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Header icon
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Home, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Home Screen")
+                        Icon(
+                            Icons.Default.Wallpaper,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        "Set Wallpaper",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "Choose where to apply",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Option: Home Screen
+                    WallpaperOptionRow(
+                        icon = Icons.Default.Home,
+                        title = "Home Screen",
+                        subtitle = "Main wallpaper",
+                        iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM) }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    // Option: Lock Screen
+                    WallpaperOptionRow(
+                        icon = Icons.Default.Lock,
+                        title = "Lock Screen",
+                        subtitle = "Shown when locked",
+                        iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                        iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_LOCK) }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    // Option: Both Screens
+                    WallpaperOptionRow(
+                        icon = Icons.Default.PhoneAndroid,
+                        title = "Both Screens",
+                        subtitle = "Home & lock screen",
+                        iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK) }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Cancel
                     TextButton(
-                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_LOCK) },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = viewModel::dismissWallpaperDialog,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     ) {
-                        Icon(Icons.Default.Lock, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Lock Screen")
+                        Text(
+                            "Cancel",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
-                    TextButton(
-                        onClick = { viewModel.setWallpaper(WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.PhoneAndroid, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Both Screens")
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = viewModel::dismissWallpaperDialog) {
-                    Text("Cancel")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WallpaperOptionRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    iconBgColor: Color,
+    iconTint: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(iconBgColor, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = iconTint
+            )
+        }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Icon(
+            Icons.Default.ChevronRight,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }
