@@ -1,58 +1,87 @@
 # 🍨 Creamie Wallpaper App
 
-A modern **Jetpack Compose showcase app** demonstrating Android UI development with declarative patterns.  
-Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3** by implementing multiple UI screens, navigation, and re-usable design patterns.
+A modern, fast, and beautiful **Jetpack Compose showcase app** for downloading and setting wallpapers, demonstrating Android UI development with declarative patterns and clean architecture.
+
+Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3** by implementing a sleek Glassmorphism UI, robust network caching, pagination, and reusable design patterns.
 
 ---
 
 ## 🚀 Features
 
-- Built entirely with **Jetpack Compose** (no legacy XML)
-- **Material Design 3** theming
-- Multiple UI component demos (cards, lists, forms, bottom bars, etc.)
-- Clean project structure for learning & extension
-- Example of **state management** and **navigation**
+- **Built entirely with Jetpack Compose** (no legacy XML)
+- **Material Design 3 & Glassmorphism** theming for a premium look
+- **Infinite Scrolling** with Paging 3
+- **Dynamic Colors** using Palette API to extract colors from images
+- **Offline Caching** backed by Room Database
+- **Background Operations** with WorkManager for downloading and setting wallpapers
+- **Home Screen Widgets** built with Glance AppWidget
+- Clean Architecture with **Hilt Dependency Injection** and **ViewModel-driven UI**
+- **Sleek Animations** using Compose Animation and Lottie
 
 ---
 
 ## 📱 App Screenshots
 
-| Screenshot 1 | Screenshot 2 | Screenshot 3 |
-|--------------|--------------|--------------|
-| ![Image1](https://github.com/rajatt04/Creamie/blob/master/app/src/1.jpeg?raw=true) | ![Image2](https://github.com/rajatt04/Creamie/blob/master/app/src/2.jpeg?raw=true) | ![Image3](https://github.com/rajatt04/Creamie/blob/master/app/src/3.jpeg?raw=true) |
+| Home & Discover | Search & Explore | Detail View |
+|:---:|:---:|:---:|
+| ![Home](https://github.com/rajatt04/Creamie/blob/master/app/src/1.jpeg?raw=true) | ![Search](https://github.com/rajatt04/Creamie/blob/master/app/src/2.jpeg?raw=true) | ![Detail](https://github.com/rajatt04/Creamie/blob/master/app/src/3.jpeg?raw=true) |
 
-| Screenshot 4 | Screenshot 5 | Screenshot 6 |
-|--------------|--------------|--------------|
-| ![Image4](https://github.com/rajatt04/Creamie/blob/master/app/src/4.jpeg?raw=true) | ![Image5](https://github.com/rajatt04/Creamie/blob/master/app/src/5.jpeg?raw=true) | ![Image6](https://github.com/rajatt04/Creamie/blob/master/app/src/6.jpeg?raw=true) |
+| Settings & More | Profile | Library & Collections |
+|:---:|:---:|:---:|
+| ![Settings](https://github.com/rajatt04/Creamie/blob/master/app/src/4.jpeg?raw=true) | ![Profile](https://github.com/rajatt04/Creamie/blob/master/app/src/5.jpeg?raw=true) | ![Library](https://github.com/rajatt04/Creamie/blob/master/app/src/6.jpeg?raw=true) |
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Architecture
 
-- **Language**: Kotlin  
-- **UI**: Jetpack Compose, Compose Material3  
-- **Architecture**: State hoisting & ViewModel driven UI  
-- **Other**: AndroidX, Navigation Compose  
+- **Language**: Kotlin
+- **UI & Animations**: Jetpack Compose, Compose Material3, Coil (Image Loading), Lottie, Glance (Widgets)
+- **Architecture**: MVI/MVVM, State Hoisting, Clean Architecture
+- **Dependency Injection**: Dagger Hilt
+- **Network & Data**: Retrofit, OkHttp, Paging 3
+- **Local Storage**: Room Database, Preferences DataStore
+- **Concurrency & Background Tasks**: Kotlin Coroutines, Flow, WorkManager
+- **Testing**: JUnit, MockK, Turbine
+- **Debugging**: LeakCanary
 
 ---
 
 ## 📦 Getting Started
 
+To get a local copy up and running, follow these simple steps:
+
 1. **Clone the repo**
    ```bash
    git clone https://github.com/rajatt04/Creamie.git
+   ```
 
-2. Open in Android Studio (latest stable, with Compose support).
+2. **Setup Pexels API Key**
+   - Create a file named `local.properties` in the root directory if it doesn't exist.
+   - Add your Pexels API key to the file:
+     ```properties
+     PEXELS_API_KEY="your_api_key_here"
+     ```
 
-3. Build & Run on an emulator or device running Android 8.0 (API 26+) or higher.
+3. **Open in Android Studio**
+   - Open the project in the latest stable version of Android Studio with Compose support.
+
+4. **Build & Run**
+   - Sync the Gradle project and run it on an emulator or device running Android 8.0 (API 26+) or higher.
+
+---
 
 ## 🤝 Contributing
 
 Contributions and suggestions are warmly welcome!
 Simply fork the repo, create a new branch, and submit a pull request.
 
+---
+
 ## 📄 License
-This project is licensed under the MIT License — see the LICENSE file for details.
+
+This project is licensed under the MIT License — see the `LICENSE` file for details.
+
+---
 
 ## 🎉 Why “Creamie”?
 Because this app is as smooth, delightful, and modern as your favorite ice cream flavor. Jetpack Compose never felt this sweet! 🍦

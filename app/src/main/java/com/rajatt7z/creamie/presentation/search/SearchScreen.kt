@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -57,6 +58,7 @@ fun SearchScreen(
                     modifier = Modifier
                         .matchParentSize()
                         .clip(RoundedCornerShape(32.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(32.dp))
                         .blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.4f))
                         .background(
