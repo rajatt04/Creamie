@@ -101,7 +101,10 @@ fun SearchScreen(
                 // Search results grid
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(
+                        start = 12.dp, end = 12.dp, top = 12.dp, 
+                        bottom = 120.dp // padding for the glassy bottom navigation bar
+                    ),
                     verticalItemSpacing = 12.dp,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()

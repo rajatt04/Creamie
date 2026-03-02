@@ -227,7 +227,10 @@ private fun FavoritesTab(
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                contentPadding = PaddingValues(
+                    start = 24.dp, end = 24.dp, top = 16.dp,
+                    bottom = 120.dp // padding for the glassy bottom navigation bar
+                ),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -279,7 +282,10 @@ private fun DownloadsTab(
             val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
 
             LazyColumn(
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                contentPadding = PaddingValues(
+                    start = 12.dp, end = 12.dp, top = 4.dp,
+                    bottom = 120.dp // padding for the glassy bottom navigation bar
+                ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(downloads) { download ->

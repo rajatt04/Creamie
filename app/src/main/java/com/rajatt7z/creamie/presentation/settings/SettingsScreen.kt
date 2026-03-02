@@ -329,7 +329,7 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(130.dp)) // Increased padding for glassy bottom navigation
         }
     }
 }

@@ -14,6 +14,10 @@ import com.rajatt7z.creamie.ui.theme.CreamieTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.rajatt7z.creamie.presentation.navigation.Routes
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -25,17 +29,34 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val preferences by preferencesManager.preferencesFlow.collectAsState(
-                initial = com.rajatt7z.creamie.data.local.datastore.UserPreferences()
+                initial = null
             )
 
-            val isDark = when (preferences.themeMode) {
+            if (preferences == null) {
+                return@setContent // wait for first emission avoiding initial flash and keeping the system splash screen
+            }
+
+            val isDark = when (preferences!!.themeMode) {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
+            val startDestination = if (preferences!!.onboardingShown) {
+                Routes.HOME
+            } else {
+                Routes.ONBOARDING
+            }
+
             CreamieTheme(darkTheme = isDark) {
-                CreamieNavGraph()
+                CreamieNavGraph(
+                    startDestination = startDestination,
+                    onOnboardingComplete = {
+                        lifecycleScope.launch {
+                            preferencesManager.setOnboardingShown(true)
+                        }
+                    }
+                )
             }
         }
     }

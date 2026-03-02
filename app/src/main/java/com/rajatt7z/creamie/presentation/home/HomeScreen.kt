@@ -1,36 +1,48 @@
 package com.rajatt7z.creamie.presentation.home
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.AsyncImage
-import com.rajatt7z.creamie.domain.model.Collection
-import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
@@ -51,7 +63,7 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+                    Column(modifier = Modifier.padding(bottom = 0.dp)) {
                         Text(
                             "DISCOVER",
                             style = MaterialTheme.typography.labelSmall.copy(
@@ -86,47 +98,19 @@ fun HomeScreen(
                 scrollBehavior = scrollBehavior
             )
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        contentWindowInsets = WindowInsets(0, 0, 0, 12)
     ) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = 12.dp, end = 12.dp,
                 top = padding.calculateTopPadding() + 8.dp,
-                bottom = 16.dp
+                bottom = 120.dp // padding for the glassy bottom navigation bar
             ),
             verticalItemSpacing = 12.dp,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            // Trending Searches Chips
-            item(span = StaggeredGridItemSpan.FullLine) {
-                TrendingSearchChips(
-                    searches = uiState.trendingSearches,
-                    onChipClick = onSearchClick
-                )
-            }
-
-            // Featured Collections Row
-            if (uiState.featuredCollections.isNotEmpty()) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    FeaturedCollectionsRow(
-                        collections = uiState.featuredCollections,
-                        onCollectionClick = onCollectionClick
-                    )
-                }
-            }
-
-            // Section Header
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Text(
-                    "Curated For You",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
 
             // Loading shimmer
             if (pagingItems.loadState.refresh is LoadState.Loading) {
@@ -167,94 +151,6 @@ fun HomeScreen(
                             ?: "Something went wrong",
                         onRetry = { pagingItems.retry() }
                     )
-                }
-            }
-        }
-    }
-}
-
-// (PhotoGridCard removed because we are using AnimatedPhotoCard now)
-@Composable
-private fun TrendingSearchChips(
-    searches: List<String>,
-    onChipClick: () -> Unit
-) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 4.dp)
-    ) {
-        items(searches) { query ->
-            SuggestionChip(
-                onClick = onChipClick,
-                label = { Text(query, style = MaterialTheme.typography.labelMedium) },
-                shape = RoundedCornerShape(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun FeaturedCollectionsRow(
-    collections: List<Collection>,
-    onCollectionClick: (String) -> Unit
-) {
-    Column {
-        Text(
-            "Featured Collections",
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(collections, key = { it.id }) { collection ->
-                Card(
-                    modifier = Modifier
-                        .width(220.dp)
-                        .height(130.dp)
-                        .clickable { onCollectionClick(collection.id) },
-                    shape = RoundedCornerShape(32.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        // Background gradient
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary.copy(alpha=0.2f),
-                                            MaterialTheme.colorScheme.secondary.copy(alpha=0.4f)
-                                        )
-                                    )
-                                )
-                        )
-                        
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(20.dp),
-                            verticalArrangement = Arrangement.Bottom
-                        ) {
-                            Text(
-                                collection.title,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                maxLines = 1,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                "${collection.photosCount} photos",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
                 }
             }
         }
