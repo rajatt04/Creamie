@@ -116,8 +116,7 @@ fun SearchScreen(
 
                     // Results
                     items(
-                        count = pagingItems.itemCount,
-                        key = { pagingItems[it]?.id ?: it }
+                        count = pagingItems.itemCount
                     ) { index ->
                         pagingItems[index]?.let { photo ->
                             AnimatedPhotoCard(

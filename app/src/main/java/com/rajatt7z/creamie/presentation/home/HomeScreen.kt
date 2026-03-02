@@ -119,8 +119,10 @@ fun HomeScreen(
 
             // Photo grid
             items(
-                count = pagingItems.itemCount,
-                key = { pagingItems[it]?.id ?: it }
+                count = pagingItems.itemCount
+                // Explicitly omitted `key` parameter. 
+                // Jetpack Compose will automatically use the position as a safe fallback key 
+                // which resolves the 'already used key' crash caused by duplicate placeholders.
             ) { index ->
                 pagingItems[index]?.let { photo ->
                     AnimatedPhotoCard(
