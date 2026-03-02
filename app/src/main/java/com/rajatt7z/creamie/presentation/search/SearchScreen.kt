@@ -16,6 +16,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -43,46 +45,97 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = uiState.query,
-                        onQueryChange = viewModel::onQueryChange,
-                        onSearch = viewModel::onSearch,
-                        expanded = false,
-                        onExpandedChange = {},
-                        placeholder = { Text("Search wallpapers...") },
-                        leadingIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                            }
-                        },
-                        trailingIcon = {
-                            Row {
-                                if (uiState.query.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                        Icon(Icons.Default.Clear, contentDescription = "Clear")
-                                    }
-                                }
-                                IconButton(onClick = viewModel::toggleFilterSheet) {
-                                    Icon(Icons.Default.FilterList, contentDescription = "Filters")
-                                }
-                            }
-                        }
-                    )
-                },
-                expanded = false,
-                onExpandedChange = {},
+            // iOS Glassmorphism Style Search Bar
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 24.dp),
-                shape = RoundedCornerShape(32.dp),
-                colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
-            ) {}
+                    .padding(WindowInsets.statusBars.asPaddingValues())
+                    .padding(horizontal = 24.dp, vertical = 24.dp)
+            ) {
+                // Glass Background
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(32.dp))
+                        .blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.4f))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.1f),
+                                    Color.White.copy(alpha = 0.05f)
+                                )
+                            )
+                        )
+                ) {
+                    // Optional: You could use Modifier.blur(20.dp) here if RenderEffect is supported, 
+                    // but alpha + gradient simulates it well across Android versions
+                }
+
+                // Inner content
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = uiState.query,
+                        onValueChange = viewModel::onQueryChange,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            if (uiState.query.isEmpty()) {
+                                Text(
+                                    text = "Search wallpapers...",
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
+
+                    Row {
+                        if (uiState.query.isNotEmpty()) {
+                            IconButton(onClick = { 
+                                viewModel.onQueryChange("") 
+                            }) {
+                                Icon(
+                                    Icons.Default.Clear, 
+                                    contentDescription = "Clear",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        IconButton(onClick = viewModel::toggleFilterSheet) {
+                            Icon(
+                                Icons.Default.FilterList, 
+                                contentDescription = "Filters",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        
     ) { padding ->
         Column(
             modifier = Modifier
