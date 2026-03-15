@@ -36,15 +36,15 @@ val TertiaryContainerDark = Color(0xFF6A3C00)
 val OnTertiaryContainerDark = Color(0xFFFFDCBE)
 
 // Surface
-val SurfaceLight = Color(0xFFFAFCFF)
-val OnSurfaceLight = Color(0xFF001F2A)
-val SurfaceVariantLight = Color(0xFFDBE4E8)
-val OnSurfaceVariantLight = Color(0xFF40484B)
+val SurfaceLight = Color(0xFFF8F9FA)
+val OnSurfaceLight = Color(0xFF1A1C1E)
+val SurfaceVariantLight = Color(0xFFDFE2E6)
+val OnSurfaceVariantLight = Color(0xFF43474E)
 
-val SurfaceDark = Color(0xFF00151D) // Ultra deep teal-black
-val OnSurfaceDark = Color(0xFFB1ECFF)
-val SurfaceVariantDark = Color(0xFF40484B)
-val OnSurfaceVariantDark = Color(0xFFBFC8CB)
+val SurfaceDark = Color(0xFF0F1115) // Deep neutral black/gray
+val OnSurfaceDark = Color(0xFFE3E2E6)
+val SurfaceVariantDark = Color(0xFF23252A)
+val OnSurfaceVariantDark = Color(0xFFC4C6D0)
 
 // Error
 val ErrorLight = Color(0xFFBA1A1A)
@@ -56,11 +56,11 @@ val OnErrorDark = Color(0xFF690005)
 val ErrorContainerDark = Color(0xFF93000A)
 
 // Background
-val BackgroundLight = Color(0xFFFAFCFF)
-val OnBackgroundLight = Color(0xFF001F2A)
-val BackgroundDark = Color(0xFF00151D)
-val OnBackgroundDark = Color(0xFFB1ECFF)
+val BackgroundLight = Color(0xFFF8F9FA)
+val OnBackgroundLight = Color(0xFF1A1C1E)
+val BackgroundDark = Color(0xFF000000) // OLED Black
+val OnBackgroundDark = Color(0xFFE3E2E6)
 
 // Outline
-val OutlineLight = Color(0xFF70787C)
-val OutlineDark = Color(0xFF8A9295)
+val OutlineLight = Color(0xFF73777F)
+val OutlineDark = Color(0xFF8D9199)

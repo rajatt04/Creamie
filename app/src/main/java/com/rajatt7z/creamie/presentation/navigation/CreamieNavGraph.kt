@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,11 +30,18 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.rajatt7z.creamie.presentation.detail.DetailScreen
+import com.rajatt7z.creamie.presentation.detail.VideoPlayerScreen
 import com.rajatt7z.creamie.presentation.home.HomeScreen
 import com.rajatt7z.creamie.presentation.library.LibraryScreen
 import com.rajatt7z.creamie.presentation.onboarding.OnboardingScreen
 import com.rajatt7z.creamie.presentation.search.SearchScreen
+import com.rajatt7z.creamie.presentation.search.PhotoSearchScreen
+import com.rajatt7z.creamie.presentation.search.VideoSearchScreen
 import com.rajatt7z.creamie.presentation.settings.SettingsScreen
+import com.rajatt7z.creamie.presentation.shorts.ShortsFeedScreen
+import com.rajatt7z.creamie.presentation.collections.CollectionsScreen
+import com.rajatt7z.creamie.presentation.collections.CollectionDetailsScreen
+import com.rajatt7z.creamie.presentation.profile.PhotographerProfileScreen
 import com.rajatt7z.creamie.screens.WidgetsScreen
 
 data class BottomNavItem(
@@ -41,16 +52,17 @@ data class BottomNavItem(
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Routes.HOME, "Home", Icons.Filled.Home, Icons.Outlined.Home),
+    BottomNavItem(Routes.DISCOVER, "Discover", Icons.Filled.Home, Icons.Outlined.Home),
     BottomNavItem(Routes.SEARCH, "Search", Icons.Filled.Search, Icons.Outlined.Search),
-    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
-    BottomNavItem(Routes.SETTINGS, "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
+    BottomNavItem(Routes.SHORTS, "Shorts", Icons.Filled.PlayArrow, Icons.Outlined.PlayArrow),
+    BottomNavItem(Routes.COLLECTIONS, "Collections", Icons.Filled.VideoLibrary, Icons.Outlined.VideoLibrary),
+    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
 )
 
 @Composable
 fun CreamieNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Routes.HOME,
+    startDestination: String = Routes.DISCOVER,
     onOnboardingComplete: () -> Unit = {}
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -97,55 +109,118 @@ fun CreamieNavGraph(
             enterTransition = { fadeIn(tween(300)) },
             exitTransition = { fadeOut(tween(300)) }
         ) {
-            composable(Routes.HOME) {
+            composable(Routes.DISCOVER) {
                 HomeScreen(
-                    onPhotoClick = { photoId -> navController.navigate(Routes.detail(photoId)) },
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
                     onSearchClick = { navController.navigate(Routes.SEARCH) },
-                    onCollectionClick = { id -> navController.navigate(Routes.collectionDetail(id)) }
+                    onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) }
                 )
             }
 
             composable(Routes.SEARCH) {
                 SearchScreen(
-                    onPhotoClick = { photoId -> navController.navigate(Routes.detail(photoId)) },
-                    onBack = { navController.popBackStack() }
+                    onSearchPhotos = { query -> navController.navigate(Routes.photoSearch(query)) },
+                    onSearchVideos = { query -> navController.navigate(Routes.videoSearch(query)) }
+                )
+            }
+            
+            composable(Routes.SHORTS) {
+                ShortsFeedScreen()
+            }
+            
+            composable(Routes.COLLECTIONS) {
+                CollectionsScreen(
+                    onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) }
                 )
             }
 
             composable(Routes.LIBRARY) {
                 LibraryScreen(
-                    onPhotoClick = { photoId -> navController.navigate(Routes.detail(photoId)) }
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
                 )
             }
 
             composable(Routes.SETTINGS) {
                 SettingsScreen()
             }
+            
+            composable(Routes.CURATED_PHOTOS) {
+                // Placeholder for Curated Photos grid
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Curated Photos (Placeholder)") }
+            }
+            
+            composable(
+                route = Routes.PHOTO_SEARCH,
+                arguments = listOf(navArgument("query") { type = NavType.StringType })
+            ) {
+                PhotoSearchScreen(
+                    onBack = { navController.popBackStack() },
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
+                )
+            }
 
             composable(
-                route = Routes.DETAIL,
+                route = Routes.VIDEO_SEARCH,
+                arguments = listOf(navArgument("query") { type = NavType.StringType })
+            ) {
+                VideoSearchScreen(
+                    onBack = { navController.popBackStack() },
+                    onVideoClick = { videoId -> navController.navigate(Routes.videoPlayer(videoId)) }
+                )
+            }
+
+            composable(
+                route = Routes.PHOTO_DETAIL,
                 arguments = listOf(navArgument("photoId") { type = NavType.IntType }),
                 deepLinks = listOf(navDeepLink { uriPattern = "creamie://wallpaper/{photoId}" })
-            ) {
+            ) { backStackEntry ->
                 DetailScreen(
                     onBack = { navController.popBackStack() },
                     onColorSearch = { color ->
-                        navController.navigate(Routes.SEARCH)
+                        navController.navigate(Routes.photoSearch(color))
+                    },
+                    onPhotographerClick = { name ->
+                        navController.navigate(Routes.photographerProfile(name))
                     }
                 )
             }
 
             composable(
-                route = Routes.COLLECTION_DETAIL,
-                arguments = listOf(navArgument("collectionId") { type = NavType.StringType }),
-                deepLinks = listOf(navDeepLink { uriPattern = "creamie://collection/{collectionId}" })
-            ) {
-                // Collection detail screen — reusing search-like grid
-                val collectionId = it.arguments?.getString("collectionId") ?: ""
-                // TODO: CollectionDetailScreen(collectionId, onBack, onPhotoClick)
+                route = Routes.VIDEO_PLAYER,
+                arguments = listOf(navArgument("videoId") { type = NavType.IntType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "creamie://video/{videoId}" })
+            ) { backStackEntry ->
+                VideoPlayerScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
-            // Keep existing widget screen
+            composable(
+                route = Routes.COLLECTION_DETAIL,
+                arguments = listOf(
+                    navArgument("collectionId") { type = NavType.StringType },
+                    navArgument("collectionTitle") { type = NavType.StringType }
+                ),
+                deepLinks = listOf(navDeepLink { uriPattern = "creamie://collection/{collectionId}/{collectionTitle}" })
+            ) { backStackEntry ->
+                CollectionDetailsScreen(
+                    onBack = { navController.popBackStack() },
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
+                )
+            }
+            
+            composable(
+                route = Routes.PHOTOGRAPHER_PROFILE,
+                arguments = listOf(navArgument("photographerName") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "creamie://profile/{photographerName}" })
+            ) { backStackEntry ->
+                PhotographerProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
+                )
+            }
+
+            // Existing widget screen
             composable(Routes.WIDGETS) {
                 WidgetsScreen(navController)
             }
@@ -155,7 +230,7 @@ fun CreamieNavGraph(
                 OnboardingScreen(
                     onComplete = {
                         onOnboardingComplete()
-                        navController.navigate(Routes.HOME) {
+                        navController.navigate(Routes.DISCOVER) {
                             popUpTo(Routes.ONBOARDING) { inclusive = true }
                         }
                     }

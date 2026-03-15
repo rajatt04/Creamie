@@ -40,6 +40,7 @@ import com.rajatt7z.creamie.core.common.Constants
 fun DetailScreen(
     onBack: () -> Unit,
     onColorSearch: (String) -> Unit,
+    onPhotographerClick: (String) -> Unit,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -165,11 +166,7 @@ fun DetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            if (photo.photographerUrl.isNotEmpty()) {
-                                uriHandler.openUri(photo.photographerUrl)
-                            }
-                        },
+                        .clickable { onPhotographerClick(photo.photographer) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
@@ -193,11 +190,19 @@ fun DetailScreen(
                             photo.photographer,
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
-                        Text(
-                            "View on Pexels \u2192",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "View Portfolio \u2192",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "• ${photo.width} x ${photo.height} px",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

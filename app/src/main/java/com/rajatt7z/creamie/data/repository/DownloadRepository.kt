@@ -111,4 +111,31 @@ class DownloadRepository @Inject constructor(
         }
         uri
     }
+
+    /**
+     * Download a video using Android DownloadManager.
+     * Saves to Movies/Creamie/ directory.
+     */
+    suspend fun downloadVideo(
+        video: com.rajatt7z.creamie.domain.model.Video,
+        quality: com.rajatt7z.creamie.domain.model.VideoFile
+    ): Long = withContext(Dispatchers.IO) {
+        val url = quality.link
+        val fileName = "creamie_video_${video.id}_${quality.quality}.mp4"
+
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle("Downloading Video")
+            .setDescription("by ${video.user.name}")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_MOVIES,
+                "${Constants.DOWNLOAD_FOLDER}/$fileName"
+            )
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(false)
+
+        downloadManager.enqueue(request)
+    }
 }
