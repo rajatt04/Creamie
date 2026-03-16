@@ -116,7 +116,7 @@ fun SearchScreen(
                     Button(
                         onClick = { 
                             viewModel.onSearch(currentQuery)
-                            onSearchPhotos(currentQuery)
+                            onSearchPhotos(android.net.Uri.encode(currentQuery))
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp)
@@ -129,7 +129,7 @@ fun SearchScreen(
                     FilledTonalButton(
                         onClick = { 
                             viewModel.onSearch(currentQuery)
-                            onSearchVideos(currentQuery) 
+                            onSearchVideos(android.net.Uri.encode(currentQuery)) 
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp)

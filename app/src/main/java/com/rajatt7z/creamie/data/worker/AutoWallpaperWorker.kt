@@ -39,7 +39,7 @@ class AutoWallpaperWorker @AssistedInject constructor(
                 ?: return@withContext Result.retry()
 
             // Download the image
-            val url = URL(photo.src.portrait)
+            val url = URL(photo.src?.portrait ?: "")
             val connection = url.openConnection()
             connection.connectTimeout = 15000
             connection.readTimeout = 15000

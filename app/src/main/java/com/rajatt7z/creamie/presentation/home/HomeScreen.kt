@@ -5,9 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +32,7 @@ import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
 @Composable
 fun HomeScreen(
     onPhotoClick: (Int) -> Unit,
-    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onCollectionClick: (String, String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -62,13 +63,19 @@ fun HomeScreen(
                 },
                 actions = {
                     FilledIconButton(
-                        onClick = onSearchClick,
+                        onClick = onSettingsClick,
+                        shape = CircleShape, // 👈 forces circular shape
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier.size(44.dp).padding(end = 12.dp)
+                        modifier = Modifier
+                            .size(52.dp) // no padding here
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(22.dp))
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(28.dp) // control icon size directly
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

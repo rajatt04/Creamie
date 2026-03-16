@@ -112,7 +112,7 @@ fun CreamieNavGraph(
             composable(Routes.DISCOVER) {
                 HomeScreen(
                     onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
-                    onSearchClick = { navController.navigate(Routes.SEARCH) },
+                    onSettingsClick = { navController.navigate(Routes.SETTINGS) },
                     onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) }
                 )
             }
@@ -177,7 +177,7 @@ fun CreamieNavGraph(
                 DetailScreen(
                     onBack = { navController.popBackStack() },
                     onColorSearch = { color ->
-                        navController.navigate(Routes.photoSearch(color))
+                        navController.navigate(Routes.photoSearch(android.net.Uri.encode(color)))
                     },
                     onPhotographerClick = { name ->
                         navController.navigate(Routes.photographerProfile(name))

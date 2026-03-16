@@ -32,7 +32,7 @@ fun PhotographerProfileScreen(
 
     // Determine a stable color for the avatar based on the name length/characters
     val avatarColor = remember(viewModel.photographerName) {
-        val hue = (viewModel.photographerName.hashCode() * 137.5f) % 360f
+        val hue = kotlin.math.abs(viewModel.photographerName.hashCode() * 137.5f) % 360f
         Color.hsv(hue, 0.6f, 0.8f)
     }
 
