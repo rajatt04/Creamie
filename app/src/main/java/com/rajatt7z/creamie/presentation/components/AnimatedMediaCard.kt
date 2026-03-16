@@ -97,19 +97,6 @@ fun AnimatedMediaCard(
             contentScale = ContentScale.Crop
         )
 
-        // Gradient overlay
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
-                    )
-                )
-        )
-
         // Title and Video indicator
         AnimatedVisibility(
             visible = visible,
