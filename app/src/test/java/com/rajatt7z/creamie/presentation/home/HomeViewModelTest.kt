@@ -7,6 +7,7 @@ import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.model.WallpaperSrc
 import com.rajatt7z.creamie.domain.repository.CollectionRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
+import com.rajatt7z.creamie.domain.repository.VideoRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,7 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var photoRepository: PhotoRepository
     private lateinit var collectionRepository: CollectionRepository
+    private lateinit var videoRepository: VideoRepository
     private lateinit var viewModel: HomeViewModel
 
     @Before
@@ -34,6 +36,7 @@ class HomeViewModelTest {
         Dispatchers.setMain(testDispatcher)
         photoRepository = mockk()
         collectionRepository = mockk()
+        videoRepository = mockk()
     }
 
     @After
@@ -46,7 +49,7 @@ class HomeViewModelTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(emptyList())
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -72,7 +75,7 @@ class HomeViewModelTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(mockCollections)
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -89,7 +92,7 @@ class HomeViewModelTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Error("Network error")
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -105,7 +108,7 @@ class HomeViewModelTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(emptyList())
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
