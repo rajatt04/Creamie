@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.layout.Spacer
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -73,7 +74,7 @@ fun HomeScreen(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
                         modifier = Modifier
-                            .size(52.dp) // no padding here
+                            .size(52.dp)
                     ) {
                         Icon(
                             Icons.Default.Settings,
