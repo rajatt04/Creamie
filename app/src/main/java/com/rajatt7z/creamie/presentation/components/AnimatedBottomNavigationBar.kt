@@ -70,11 +70,9 @@ fun AnimatedBottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
             .height(72.dp)
-            .clip(RoundedCornerShape(36.dp)) // Super rounded pill shape
             .background(barBackgroundColor)
-            .border(1.dp, barBorderColor, RoundedCornerShape(36.dp))
+            .border(0.5.dp, barBorderColor) // Subtle border
     ) {
         
         // The moving highlight indicator placed explicitly using an animated offset
