@@ -19,8 +19,7 @@ object Routes {
     const val CURATED_PHOTOS = "curated_photos"
     const val PHOTO_SEARCH = "photo_search/{query}" // Deep search for photos
     fun photoSearch(query: String) = "photo_search/$query"
-    const val VIDEO_SEARCH = "video_search/{query}" // Deep search for videos
-    fun videoSearch(query: String) = "video_search/$query"
+
 
     // Details Path
     const val PHOTO_DETAIL = "detail/photo/{photoId}"

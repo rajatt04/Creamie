@@ -23,19 +23,10 @@ class ApiTest {
         
         try {
             println("Searching photos...")
-            val photos = api.searchPhotos(query = "nature")
+            api.searchPhotos(query = "nature")
             println("Found photos: \${photos.photos.size}")
         } catch (e: Exception) {
             println("Error photos: \${e.message}")
-            e.printStackTrace()
-        }
-
-        try {
-            println("Searching videos...")
-            val videos = api.searchVideos(query = "nature")
-            println("Found videos: \${videos.videos.size}")
-        } catch (e: Exception) {
-            println("Error videos: \${e.message}")
             e.printStackTrace()
         }
     }

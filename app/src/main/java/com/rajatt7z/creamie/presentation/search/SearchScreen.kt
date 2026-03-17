@@ -28,7 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun SearchScreen(
     onSearchPhotos: (String) -> Unit,
-    onSearchVideos: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -87,7 +86,7 @@ fun SearchScreen(
                         decorationBox = { innerTextField ->
                             if (currentQuery.isEmpty()) {
                                 Text(
-                                    text = "Search anything...",
+                                    text = "Search images...",
                                     style = MaterialTheme.typography.bodyLarge.copy(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                         fontWeight = FontWeight.Medium
@@ -124,18 +123,7 @@ fun SearchScreen(
                         Text("Photos for \"$currentQuery\"", style = MaterialTheme.typography.titleMedium)
                     }
                     
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    FilledTonalButton(
-                        onClick = { 
-                            viewModel.onSearch(currentQuery)
-                            onSearchVideos(android.net.Uri.encode(currentQuery)) 
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Videos for \"$currentQuery\"", style = MaterialTheme.typography.titleMedium)
-                    }
+
                 }
             } else {
                 // History
