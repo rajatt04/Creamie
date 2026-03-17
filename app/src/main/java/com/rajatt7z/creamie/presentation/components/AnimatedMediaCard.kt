@@ -36,8 +36,19 @@ fun AnimatedMediaCard(
     durationText: String? = null,
     index: Int = 0,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isPlaceholder: Boolean = false
 ) {
+    if (isPlaceholder) {
+        ShimmerPlaceholder(
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(aspectRatio.coerceIn(0.5f, 1.8f))
+                .clip(RoundedCornerShape(24.dp))
+        )
+        return
+    }
+
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         visible = true

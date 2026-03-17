@@ -27,6 +27,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.domain.model.Collection
 import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
+import com.rajatt7z.creamie.presentation.components.HomeSectionSkeleton
+import com.rajatt7z.creamie.presentation.components.ShimmerCollectionCard
+import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,11 +118,23 @@ fun HomeScreen(
                             )
                         }
                     }
+                    if (curatedPhotos.loadState.refresh is LoadState.Loading) {
+                        items(5) {
+                            AnimatedMediaCard(
+                                thumbnailUrl = "",
+                                aspectRatio = 0.8f,
+                                title = "",
+                                isVideo = false,
+                                index = it,
+                                onClick = {},
+                                modifier = Modifier.width(200.dp),
+                                isPlaceholder = true
+                            )
+                        }
+                    }
                     if (curatedPhotos.loadState.append is LoadState.Loading) {
                         item {
-                            Box(modifier = Modifier.width(200.dp).height(250.dp), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
+                            ShimmerPhotoCard(modifier = Modifier.width(200.dp))
                         }
                     }
                 }
@@ -153,11 +168,23 @@ fun HomeScreen(
                             )
                         }
                     }
+                    if (popularVideos.loadState.refresh is LoadState.Loading) {
+                        items(5) {
+                            AnimatedMediaCard(
+                                thumbnailUrl = "",
+                                aspectRatio = 1.2f,
+                                title = "",
+                                isVideo = true,
+                                index = it,
+                                onClick = {},
+                                modifier = Modifier.width(260.dp),
+                                isPlaceholder = true
+                            )
+                        }
+                    }
                     if (popularVideos.loadState.append is LoadState.Loading) {
                         item {
-                            Box(modifier = Modifier.width(260.dp).height(200.dp), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
+                            ShimmerPhotoCard(modifier = Modifier.width(260.dp))
                         }
                     }
                 }
@@ -182,8 +209,15 @@ fun HomeScreen(
                 }
             } else if (uiState.isCollectionsLoading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    SectionHeader(title = "Featured Collections", subtitle = "Curated groups")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(5) {
+                            ShimmerCollectionCard()
+                        }
                     }
                 }
             }
