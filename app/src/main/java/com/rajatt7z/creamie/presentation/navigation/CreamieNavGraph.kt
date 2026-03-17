@@ -121,6 +121,7 @@ fun CreamieNavGraph(
             composable(Routes.DISCOVER) {
                 HomeScreen(
                     onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
+                    onVideoClick = { videoId -> navController.navigate(Routes.videoPlayer(videoId)) },
                     onSettingsClick = { navController.navigate(Routes.SETTINGS) },
                     onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) }
                 )

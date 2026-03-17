@@ -35,6 +35,7 @@ import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 @Composable
 fun HomeScreen(
     onPhotoClick: (Int) -> Unit,
+    onVideoClick: (Int) -> Unit,
     onSettingsClick: () -> Unit,
     onCollectionClick: (String, String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -163,7 +164,7 @@ fun HomeScreen(
                                 isVideo = true,
                                 durationText = durationStr,
                                 index = index,
-                                onClick = { /* Navigate to video player */ }, // Will be wired up in NavGraph differently if needed
+                                onClick = { onVideoClick(video.id) },
                                 modifier = Modifier.width(260.dp)
                             )
                         }

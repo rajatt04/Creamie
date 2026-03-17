@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,139 +95,151 @@ fun VideoPlayerScreen(
             exoPlayer.playWhenReady = true
         }
     }
-
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Black,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color.Black)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Full Screen Video Player
-            AndroidView(
-                factory = { ctx ->
-                    PlayerView(ctx).apply {
-                        player = exoPlayer
-                        useController = true
-                        setShowNextButton(false)
-                        setShowPreviousButton(false)
-                        setControllerShowTimeoutMs(3000)
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-
-            // Top Gradient & Back Button
+            // 1. YouTube-style Video Player Area (Fixed Aspect Ratio)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
-                    .background(
-                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                            colors = listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)
-                        )
-                    )
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .aspectRatio(1.77f) // 16:9
+                    .background(Color.Black)
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                        .size(48.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-                }
-
-                if (selectedQuality != null) {
-                    // Quality indicator
-                    Surface(
-                        modifier = Modifier.clickable { viewModel.setShowQualitySheet(true) },
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color.Black.copy(alpha = 0.5f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(Icons.Default.HighQuality, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                            Text(
-                                "${selectedQuality.quality.uppercase()} (${selectedQuality.width}x${selectedQuality.height})",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                AndroidView(
+                    factory = { ctx ->
+                        PlayerView(ctx).apply {
+                            player = exoPlayer
+                            useController = true
+                            setShowNextButton(false)
+                            setShowPreviousButton(false)
+                            setControllerShowTimeoutMs(3000)
+                            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                         }
-                    }
-                }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
-            // Bottom Actions Panel
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
-                    .navigationBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 24.dp)
+            // 2. Scrollable Content below video
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier.size(48.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                video.user.name.firstOrNull()?.uppercase() ?: "?",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
+                // Video Info
+                item {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            video.user.name,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            text = "Amazing video content by ${video.user.name}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "${video.duration} seconds",
+                            text = "1.2M views • 2 days ago", // Placeholders
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
 
-                    Button(
-                        onClick = viewModel::downloadVideo,
-                        shape = RoundedCornerShape(24.dp),
-                        enabled = !uiState.isDownloading
+                // Action Buttons Row
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (uiState.isDownloading) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-                        } else {
-                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Download")
+                        ActionButton(icon = Icons.Default.Download, label = "Download", onClick = viewModel::downloadVideo, isLoading = uiState.isDownloading)
+                        ActionButton(icon = Icons.Default.HighQuality, label = "Quality", onClick = { viewModel.setShowQualitySheet(true) })
+                    }
+                }
+
+                item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp) }
+
+                // Channel Info
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    video.user.name.firstOrNull()?.uppercase() ?: "?",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                video.user.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "850K subscribers", // Placeholder
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Button(
+                            onClick = { /* Subscribe logic */ },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onBackground,
+                                contentColor = MaterialTheme.colorScheme.background
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Subscribe")
                         }
                     }
+                }
+
+                item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp) }
+
+                // Related Content Section
+                item {
+                    Text(
+                        "Related content",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                // Related video skeletons/placeholders
+                items(5) {
+                    RelatedVideoItem()
                 }
             }
         }
@@ -279,6 +292,74 @@ fun VideoPlayerScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ActionButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    isLoading: Boolean = false
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(label, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+fun RelatedVideoItem() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(160.dp)
+                .aspectRatio(1.77f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(16.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .height(12.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .height(12.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+            )
         }
     }
 }
