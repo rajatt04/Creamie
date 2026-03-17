@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -60,9 +61,9 @@ fun AnimatedBottomNavigationBar(
         label = "indicator_offset_x"
     )
 
-    // Ultra glassy transparent background
-    val barBackgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
-    val barBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    // Completely transparent background
+    val barBackgroundColor = Color.Transparent
+    val barBorderColor = Color.Transparent
     
     // The accent color for the highlight
     val indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
@@ -70,11 +71,8 @@ fun AnimatedBottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
             .height(72.dp)
-            .clip(RoundedCornerShape(36.dp)) // Super rounded pill shape
             .background(barBackgroundColor)
-            .border(1.dp, barBorderColor, RoundedCornerShape(36.dp))
     ) {
         
         // The moving highlight indicator placed explicitly using an animated offset

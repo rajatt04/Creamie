@@ -1,65 +1,51 @@
 package com.rajatt7z.creamie.presentation.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.layout.Spacer
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
+import coil.compose.AsyncImage
+import com.rajatt7z.creamie.domain.model.Collection
+import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
+import com.rajatt7z.creamie.presentation.components.HomeSectionSkeleton
+import com.rajatt7z.creamie.presentation.components.ShimmerCollectionCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onPhotoClick: (Int) -> Unit,
-    onSearchClick: () -> Unit,
-    onCollectionClick: (String) -> Unit,
+    onVideoClick: (Int) -> Unit,
+    onSettingsClick: () -> Unit,
+    onCollectionClick: (String, String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val pagingItems = viewModel.curatedPhotos.collectAsLazyPagingItems()
+    val curatedPhotos = viewModel.curatedPhotos.collectAsLazyPagingItems()
+    val popularVideos = viewModel.popularVideos.collectAsLazyPagingItems()
     val uiState by viewModel.uiState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
@@ -82,77 +68,159 @@ fun HomeScreen(
                 },
                 actions = {
                     FilledIconButton(
-                        onClick = onSearchClick,
+                        onClick = onSettingsClick,
+                        shape = CircleShape, // 👈 forces circular shape
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier
+                            .size(52.dp)
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(22.dp))
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(28.dp) // control icon size directly
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                scrollBehavior = scrollBehavior
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 12)
     ) { padding ->
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = 12.dp, end = 12.dp,
                 top = padding.calculateTopPadding() + 8.dp,
-                bottom = 120.dp // padding for the glassy bottom navigation bar
+                bottom = 120.dp
             ),
-            verticalItemSpacing = 12.dp,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-
-            // Loading shimmer
-            if (pagingItems.loadState.refresh is LoadState.Loading) {
-                items(6) { ShimmerPhotoCard(modifier = Modifier.fillMaxWidth()) }
-            }
-
-            // Photo grid
-            items(
-                count = pagingItems.itemCount
-                // Explicitly omitted `key` parameter. 
-                // Jetpack Compose will automatically use the position as a safe fallback key 
-                // which resolves the 'already used key' crash caused by duplicate placeholders.
-            ) { index ->
-                pagingItems[index]?.let { photo ->
-                    AnimatedPhotoCard(
-                        photo = photo,
-                        index = index,
-                        onClick = { onPhotoClick(photo.id) }
-                    )
-                }
-            }
-
-            // Append loading
-            if (pagingItems.loadState.append is LoadState.Loading) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            
+            // 1. Curator's Picks (Photos)
+            item {
+                SectionHeader(title = "Curator's Picks", subtitle = "Handpicked for you")
+                Spacer(modifier = Modifier.height(12.dp))
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(curatedPhotos.itemCount) { index ->
+                        curatedPhotos[index]?.let { photo ->
+                            AnimatedMediaCard(
+                                thumbnailUrl = photo.src.medium,
+                                aspectRatio = 0.8f,
+                                title = photo.photographer,
+                                isVideo = false,
+                                index = index,
+                                onClick = { onPhotoClick(photo.id) },
+                                modifier = Modifier.width(200.dp)
+                            )
+                        }
+                    }
+                    if (curatedPhotos.loadState.refresh is LoadState.Loading) {
+                        items(5) {
+                            AnimatedMediaCard(
+                                thumbnailUrl = "",
+                                aspectRatio = 0.8f,
+                                title = "",
+                                isVideo = false,
+                                index = it,
+                                onClick = {},
+                                modifier = Modifier.width(200.dp),
+                                isPlaceholder = true
+                            )
+                        }
+                    }
+                    if (curatedPhotos.loadState.append is LoadState.Loading) {
+                        item {
+                            ShimmerPhotoCard(modifier = Modifier.width(200.dp))
+                        }
                     }
                 }
             }
 
-            // Error state
-            if (pagingItems.loadState.refresh is LoadState.Error) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    ErrorCard(
-                        message = (pagingItems.loadState.refresh as LoadState.Error).error.localizedMessage
-                            ?: "Something went wrong",
-                        onRetry = { pagingItems.retry() }
-                    )
+            // 2. Trending Motion (Videos)
+            item {
+                SectionHeader(title = "Trending Motion", subtitle = "Popular videos today")
+                Spacer(modifier = Modifier.height(12.dp))
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(popularVideos.itemCount) { index ->
+                        popularVideos[index]?.let { video ->
+                            val durationStr = if (video.duration >= 60) {
+                                "${video.duration / 60}:${(video.duration % 60).toString().padStart(2, '0')}"
+                            } else {
+                                "0:${video.duration.toString().padStart(2, '0')}"
+                            }
+                            
+                            AnimatedMediaCard(
+                                thumbnailUrl = video.image,
+                                aspectRatio = 1.2f, // Wider for videos
+                                title = video.user.name,
+                                isVideo = true,
+                                durationText = durationStr,
+                                index = index,
+                                onClick = { onVideoClick(video.id) },
+                                modifier = Modifier.width(260.dp)
+                            )
+                        }
+                    }
+                    if (popularVideos.loadState.refresh is LoadState.Loading) {
+                        items(5) {
+                            AnimatedMediaCard(
+                                thumbnailUrl = "",
+                                aspectRatio = 1.2f,
+                                title = "",
+                                isVideo = true,
+                                index = it,
+                                onClick = {},
+                                modifier = Modifier.width(260.dp),
+                                isPlaceholder = true
+                            )
+                        }
+                    }
+                    if (popularVideos.loadState.append is LoadState.Loading) {
+                        item {
+                            ShimmerPhotoCard(modifier = Modifier.width(260.dp))
+                        }
+                    }
+                }
+            }
+
+            // 3. Featured Collections
+            if (!uiState.isCollectionsLoading && uiState.featuredCollections.isNotEmpty()) {
+                item {
+                    SectionHeader(title = "Featured Collections", subtitle = "Curated groups")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(uiState.featuredCollections) { collection ->
+                            CollectionCard(
+                                collection = collection,
+                                onClick = { onCollectionClick(collection.id, collection.title) }
+                            )
+                        }
+                    }
+                }
+            } else if (uiState.isCollectionsLoading) {
+                item {
+                    SectionHeader(title = "Featured Collections", subtitle = "Curated groups")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(5) {
+                            ShimmerCollectionCard()
+                        }
+                    }
                 }
             }
         }
@@ -160,34 +228,55 @@ fun HomeScreen(
 }
 
 @Composable
-private fun ErrorCard(
-    message: String,
-    onRetry: () -> Unit
+fun SectionHeader(title: String, subtitle: String) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun CollectionCard(
+    collection: Collection,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .width(160.dp)
+            .height(120.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        ),
-        shape = RoundedCornerShape(16.dp)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "😕",
-                fontSize = 48.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            FilledTonalButton(onClick = onRetry) {
-                Text("Retry")
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = collection.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${collection.mediaCount} items",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

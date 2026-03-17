@@ -37,7 +37,7 @@ class DailyWallpaperWorker @AssistedInject constructor(
                 ?: return@withContext Result.retry()
 
             // Download and cache
-            val url = URL(photo.src.landscape)
+            val url = URL(photo.src?.landscape ?: "")
             val connection = url.openConnection()
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
