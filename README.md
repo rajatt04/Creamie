@@ -22,13 +22,17 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 
 ## 📱 App Screenshots
 
-| Home & Discover | Search & Explore | Detail View |
-|:---:|:---:|:---:|
-| ![Home](https://github.com/rajatt04/Creamie/blob/master/app/src/1.jpeg?raw=true) | ![Search](https://github.com/rajatt04/Creamie/blob/master/app/src/2.jpeg?raw=true) | ![Detail](https://github.com/rajatt04/Creamie/blob/master/app/src/3.jpeg?raw=true) |
+## App Screenshots
 
-| Settings & More | Profile | Library & Collections |
-|:---:|:---:|:---:|
-| ![Settings](https://github.com/rajatt04/Creamie/blob/master/app/src/4.jpeg?raw=true) | ![Profile](https://github.com/rajatt04/Creamie/blob/master/app/src/5.jpeg?raw=true) | ![Library](https://github.com/rajatt04/Creamie/blob/master/app/src/6.jpeg?raw=true) |
+Below are some screenshots of the Creamie application showcasing its features and user interface:
+
+| Screenshot 1      | Screenshot 2      | Screenshot 3      |Screenshot 4       |
+|-------------------|-------------------|-------------------|-------------------|
+| ![Image1](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_100936.jpg?raw=true) | ![Image2](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_100950.jpg?raw=true) | ![Image3](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101023.jpg?raw=true) |![Image4](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101027.jpg?raw=true) |
+
+| Screenshot 5      | Screenshot 6      | Screenshot 7      |Screenshot 8       |
+|-------------------|-------------------|-------------------|-------------------|
+| ![Image5](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101108.jpg?raw=true) | ![Image6](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101105.jpg?raw=true) | ![Image7](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101121.jpg?raw=true) |![Image8](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_2026_0318_101134.jpg?raw=true) |
 
 ---
 
