@@ -28,11 +28,11 @@ Below are some screenshots of the Creamie application showcasing its features an
 
 | Screenshot 1      | Screenshot 2      | Screenshot 3      |Screenshot 4       |
 |-------------------|-------------------|-------------------|-------------------|
-| ![Image1](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_100936.jpg?raw=true) | ![Image2](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_100950.jpg?raw=true) | ![Image3](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101023.jpg?raw=true) |![Image4](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101027.jpg?raw=true) |
+| ![Image1](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_2026_0417_195415.jpg?raw=true) | ![Image2](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195433.jpg?raw=true) | ![Image3](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195438.jpg?raw=true) |![Image4](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195454.jpg?raw=true) |
 
 | Screenshot 5      | Screenshot 6      | Screenshot 7      |Screenshot 8       |
 |-------------------|-------------------|-------------------|-------------------|
-| ![Image5](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101108.jpg?raw=true) | ![Image6](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101105.jpg?raw=true) | ![Image7](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_20260318_101121.jpg?raw=true) |![Image8](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_2026_0318_101134.jpg?raw=true) |
+| ![Image5](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195425.jpg?raw=true) | ![Image6](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195451.jpg?raw=true) | ![Image7](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195532.jpg?raw=true) |![Image8](https://github.com/rajatt04/rajatt04.github.io/blob/main/images/Creamie/Screenshot_2026_0318_101134.jpg?raw=true) |
 
 ---
 
