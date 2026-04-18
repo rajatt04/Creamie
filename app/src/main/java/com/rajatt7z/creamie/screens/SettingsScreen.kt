@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
@@ -60,7 +60,7 @@ fun SettingsScreen(
     var notificationsEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(true) }
 
-    val context = LocalContext.current
+    LocalContext.current
 
     Scaffold(
         topBar = {
@@ -156,7 +156,7 @@ fun SettingsScreen(
                             Uri.fromParts("package", context.packageName, null)
                         )
                         context.startActivity(intent)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // Fallback to general settings if specific app settings fail
                         try {
                             context.startActivity(Intent(Settings.ACTION_SETTINGS))
@@ -303,7 +303,7 @@ fun SettingsClickableItem(
         },
         trailingContent = {
             Icon(
-                imageVector = Icons.Outlined.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

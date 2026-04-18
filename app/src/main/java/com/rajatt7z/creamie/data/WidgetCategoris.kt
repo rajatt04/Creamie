@@ -5,7 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.rajatt7z.creamie.models.WidgetCategory
@@ -27,7 +27,7 @@ fun getAllCategories(): List<WidgetCategory> {
         WidgetCategory("Weather", Icons.Default.Info, listOf(
             WidgetItem("iOS Weather Widget", "Detailed weather with current location", "com.rajatt7z.creamie.presentation.widget.IosWeatherWidgetReceiver") { CurrentWeatherWidget() }
         )),
-        WidgetCategory("Productivity", Icons.Default.List, listOf(
+        WidgetCategory("Productivity", Icons.AutoMirrored.Filled.List, listOf(
             WidgetItem("Material Calendar", "Month view calendar", "com.rajatt7z.creamie.presentation.widget.CalendarWidgetReceiver") { CalendarWidget() }
         )),
         WidgetCategory("Media", Icons.Default.AccountBox, listOf(

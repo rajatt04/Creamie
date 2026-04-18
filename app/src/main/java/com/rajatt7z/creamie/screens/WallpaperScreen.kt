@@ -1,7 +1,5 @@
 package com.rajatt7z.creamie.screens
 
-import androidx.compose.material3.Icon
-
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.WallpaperManager
@@ -43,19 +41,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -302,7 +293,7 @@ private fun EnhancedTopAppBar(onBackClick: () -> Unit) {
                     )
             ) {
                 Icon(
-                    Icons.Filled.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
@@ -567,7 +558,6 @@ private fun EnhancedAdjustmentControls(
             // Enhanced Theme tint toggle
             EnhancedToggleControl(
                 label = "Theme Tint",
-                icon = Icons.Default.Settings,
                 checked = uiState.imageTint,
                 onCheckedChange = { viewModel.toggleTint() }
             )
@@ -826,7 +816,6 @@ private fun EnhancedAdjustmentSlider(
 @Composable
 private fun EnhancedToggleControl(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -908,7 +897,7 @@ private fun EnhancedWallpaperButton(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.primary
             ),
-            border = ButtonDefaults.outlinedButtonBorder.copy(
+            border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
