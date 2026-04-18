@@ -93,6 +93,17 @@
                 android:resource="@xml/digital_clock_widget_info" />
         </receiver>
 
+        <!-- Analog Clock widget -->
+        <receiver android:name=".AppWidgets.AnalogClockAppWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/analog_clock_widget_info" />
+        </receiver>
+
         <!-- FileProvider for sharing wallpapers -->
         <provider
             android:name="androidx.core.content.FileProvider"
