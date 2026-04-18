@@ -22,6 +22,8 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +67,8 @@ val bottomNavItems = listOf(
     BottomNavItem(Routes.SEARCH, "Search", Icons.Filled.Search, Icons.Outlined.Search),
     BottomNavItem(Routes.SHORTS, "Shorts", Icons.Filled.PlayArrow, Icons.Outlined.PlayArrow),
     BottomNavItem(Routes.COLLECTIONS, "Collections", Icons.Filled.VideoLibrary, Icons.Outlined.VideoLibrary),
-    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
+    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
+    BottomNavItem(Routes.WIDGETS, "Widgets", Icons.Filled.Widgets, Icons.Outlined.Widgets)
 )
 
 @Composable
