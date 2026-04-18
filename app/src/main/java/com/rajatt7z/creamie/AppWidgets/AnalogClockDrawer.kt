@@ -4,20 +4,22 @@ import android.content.Context
 import android.graphics.*
 import android.content.res.Configuration
 import java.util.Calendar
+import androidx.core.graphics.toColorInt
+import androidx.core.graphics.createBitmap
 
 object AnalogClockDrawer {
     fun drawAnalogClock(context: Context, width: Int = 400, height: Int = 400): Bitmap {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(width, height)
         val canvas = Canvas(bitmap)
         
         val centerX = width / 2f
         val centerY = height / 2f
         val radius = Math.min(centerX, centerY) * 0.90f
         val isDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        val primaryColor = if (isDarkMode) Color.WHITE else Color.parseColor("#121212")
-        val secondaryColor = if (isDarkMode) Color.LTGRAY else Color.parseColor("#424242")
-        val tickColor = if (isDarkMode) Color.parseColor("#BDBDBD") else Color.DKGRAY
-        val accentColor = if (isDarkMode) Color.parseColor("#FFB74D") else Color.parseColor("#FF9800")
+        val primaryColor = if (isDarkMode) Color.BLACK else "#121212".toColorInt()
+        val secondaryColor = if (isDarkMode) Color.BLACK else "#424242".toColorInt()
+        val tickColor = if (isDarkMode) "#BDBDBD".toColorInt() else Color.DKGRAY
+        val accentColor = if (isDarkMode) "#FFB74D".toColorInt() else "#FF9800".toColorInt()
         
         // No background drawn here, handled by widget_background.xml layout
         
