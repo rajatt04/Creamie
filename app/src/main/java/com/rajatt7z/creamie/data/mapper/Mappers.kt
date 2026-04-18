@@ -159,14 +159,18 @@ fun CollectionMediaDto.toPhotoDomain(): Photo? {
         }
         "Video" -> {
             val thumbnailUrl = image ?: return null
+            val videoPhotographer = user?.name ?: photographer ?: "Unknown"
+            val videoPhotographerUrl = user?.url ?: photographerUrl ?: ""
+            val videoPhotographerId = user?.id?.toLong() ?: 0L
+
             Photo(
                 id = id,
                 width = width ?: 0,
                 height = height ?: 0,
                 url = url ?: "",
-                photographer = photographer ?: "Unknown",
-                photographerUrl = photographerUrl ?: "",
-                photographerId = 0L,
+                photographer = videoPhotographer,
+                photographerUrl = videoPhotographerUrl,
+                photographerId = videoPhotographerId,
                 avgColor = null,
                 src = WallpaperSrc(
                     original = thumbnailUrl,

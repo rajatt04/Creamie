@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.rajatt7z.creamie"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rajatt7z.creamie"

@@ -123,5 +123,6 @@ data class CollectionMediaDto(
     // Video fields
     val image: String?,
     val duration: Int?,
+    val user: VideoUserDto?,
     @SerializedName("video_files") val videoFiles: List<VideoFileDto>?
 )
