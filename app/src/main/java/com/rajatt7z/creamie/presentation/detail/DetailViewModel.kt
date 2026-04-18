@@ -1,26 +1,24 @@
 package com.rajatt7z.creamie.presentation.detail
 
-import android.app.WallpaperManager
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.data.repository.DownloadRepository
 import com.rajatt7z.creamie.data.repository.WallpaperSetterRepository
 import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.repository.FavoritesRepository
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.rajatt7z.creamie.domain.repository.FollowsRepository
 
 data class DetailUiState(
     val photo: Photo? = null,
@@ -34,7 +32,8 @@ data class DetailUiState(
     val selectedQuality: String = "large2x",
     val colorPalette: List<Int> = emptyList(),
     val showWallpaperDialog: Boolean = false,
-    val isFollowing: Boolean = false
+    val isFollowing: Boolean = false,
+    val cropHint: android.graphics.Rect? = null
 )
 
 @HiltViewModel
@@ -153,13 +152,18 @@ class DetailViewModel @Inject constructor(
         _uiState.update { it.copy(showWallpaperDialog = false) }
     }
 
+    fun setCropHint(rect: android.graphics.Rect?) {
+        _uiState.update { it.copy(cropHint = rect) }
+    }
+
     fun setWallpaper(flag: Int) {
         val photo = _uiState.value.photo ?: return
         val quality = _uiState.value.selectedQuality
+        val cropHint = _uiState.value.cropHint
         val url = photo.src.forQuality(quality)
         viewModelScope.launch {
             _uiState.update { it.copy(isSettingWallpaper = true, showWallpaperDialog = false) }
-            wallpaperSetterRepository.setWallpaper(url, flag).fold(
+            wallpaperSetterRepository.setWallpaper(url, flag, cropHint).fold(
                 onSuccess = { msg ->
                     _uiState.update {
                         it.copy(isSettingWallpaper = false, message = msg)
@@ -201,7 +205,7 @@ class DetailViewModel @Inject constructor(
 
                 // Recycle the copy if we made one
                 if (safeBitmap !== bitmap) safeBitmap.recycle()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Silently fail — color palette is cosmetic
             }
         }

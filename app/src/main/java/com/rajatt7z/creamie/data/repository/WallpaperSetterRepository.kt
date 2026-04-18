@@ -21,12 +21,13 @@ class WallpaperSetterRepository @Inject constructor(
      */
     suspend fun setWallpaper(
         imageUrl: String,
-        flag: Int
+        flag: Int,
+        cropHint: android.graphics.Rect? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val bitmap = BitmapFactory.decodeStream(URL(imageUrl).openStream())
             val wallpaperManager = WallpaperManager.getInstance(context)
-            wallpaperManager.setBitmap(bitmap, null, true, flag)
+            wallpaperManager.setBitmap(bitmap, cropHint, true, flag)
             bitmap.recycle()
 
             val target = when (flag) {
