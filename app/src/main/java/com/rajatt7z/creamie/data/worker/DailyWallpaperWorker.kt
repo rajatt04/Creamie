@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
+import androidx.glance.appwidget.updateAll
+import com.rajatt7z.creamie.presentation.widget.WallpaperOfTheDayWidget
 
 /**
  * Worker that prefetches and caches the "Daily Wallpaper"
@@ -48,6 +50,9 @@ class DailyWallpaperWorker @AssistedInject constructor(
                 inputStream.copyTo(output)
             }
             inputStream.close()
+
+            // Update the widget to show the new image
+            WallpaperOfTheDayWidget().updateAll(applicationContext)
 
             Result.success()
         } catch (e: Exception) {

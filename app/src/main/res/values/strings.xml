@@ -6,4 +6,5 @@
     <string name="shortcut_favorites">Favorites</string>
     <string name="shortcut_favorites_long">My Favorites</string>
     <string name="wotd_widget_description">Shows a fresh wallpaper every day</string>
+    <string name="calendar_widget_description">A beautiful Material Theme calendar</string>
 </resources>

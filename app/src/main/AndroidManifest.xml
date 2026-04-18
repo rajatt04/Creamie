@@ -104,7 +104,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Wallpaper of the Day widget -->
         <receiver android:name=".presentation.widget.WallpaperOfTheDayWidgetReceiver"
             android:exported="true">
             <intent-filter>
@@ -113,6 +112,17 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/wallpaper_of_the_day_widget_info" />
+        </receiver>
+
+        <!-- Calendar Widget -->
+        <receiver android:name=".presentation.widget.CalendarWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/calendar_widget_info" />
         </receiver>
 
         <!-- Remove default WorkManagerInitializer for on-demand initialization -->
