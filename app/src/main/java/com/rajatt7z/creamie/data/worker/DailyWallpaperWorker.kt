@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
+import androidx.glance.appwidget.updateAll
+import com.rajatt7z.creamie.presentation.widget.WallpaperOfTheDayWidget
 
 /**
  * Worker that prefetches and caches the "Daily Wallpaper"
@@ -37,7 +39,7 @@ class DailyWallpaperWorker @AssistedInject constructor(
                 ?: return@withContext Result.retry()
 
             // Download and cache
-            val url = URL(photo.src.landscape)
+            val url = URL(photo.src?.landscape ?: "")
             val connection = url.openConnection()
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
@@ -48,6 +50,18 @@ class DailyWallpaperWorker @AssistedInject constructor(
                 inputStream.copyTo(output)
             }
             inputStream.close()
+
+            // Update the widget state to store the photo ID
+            val manager = androidx.glance.appwidget.GlanceAppWidgetManager(applicationContext)
+            val glanceIds = manager.getGlanceIds(WallpaperOfTheDayWidget::class.java)
+            for (glanceId in glanceIds) {
+                androidx.glance.appwidget.state.updateAppWidgetState(applicationContext, glanceId) { prefs ->
+                    prefs[androidx.datastore.preferences.core.intPreferencesKey("photo_id")] = photo.id
+                }
+            }
+
+            // Update the widget to show the new image
+            WallpaperOfTheDayWidget().updateAll(applicationContext)
 
             Result.success()
         } catch (e: Exception) {

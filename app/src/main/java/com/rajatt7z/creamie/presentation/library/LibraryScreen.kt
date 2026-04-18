@@ -16,9 +16,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.data.local.entity.DownloadHistoryEntity
 import com.rajatt7z.creamie.domain.model.Photo
+import com.rajatt7z.creamie.domain.model.FollowedPhotographer
 import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
 import java.text.SimpleDateFormat
 import java.util.*
@@ -94,6 +97,9 @@ fun LibraryScreen(
                     downloads = uiState.downloads,
                     onClear = viewModel::clearDownloadHistory
                 )
+                2 -> FollowsTab(
+                    follows = uiState.follows
+                )
             }
         }
     }
@@ -118,14 +124,18 @@ private fun PillTabRow(
             selected = selectedTab == 0,
             onClick = { onTabSelected(0) },
             icon = if (selectedTab == 0) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            label = "Favorites",
             modifier = Modifier.weight(1f)
         )
         PillTab(
             selected = selectedTab == 1,
             onClick = { onTabSelected(1) },
             icon = if (selectedTab == 1) Icons.Filled.Download else Icons.Outlined.Download,
-            label = "Downloads",
+            modifier = Modifier.weight(1f)
+        )
+        PillTab(
+            selected = selectedTab == 2,
+            onClick = { onTabSelected(2) },
+            icon = if (selectedTab == 2) Icons.Filled.Person else Icons.Outlined.Person,
             modifier = Modifier.weight(1f)
         )
     }
@@ -136,7 +146,6 @@ private fun PillTab(
     selected: Boolean,
     onClick: () -> Unit,
     icon: ImageVector,
-    label: String,
     modifier: Modifier = Modifier
 ) {
     val bgColor by animateColorAsState(
@@ -164,24 +173,15 @@ private fun PillTab(
         color = bgColor,
         shape = RoundedCornerShape(26.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(24.dp),
                 tint = contentColor
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                ),
-                color = contentColor
             )
         }
     }
@@ -426,6 +426,89 @@ private fun EmptyStateView(
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp
             )
+        }
+    }
+}
+
+@Composable
+private fun FollowsTab(
+    follows: List<FollowedPhotographer>
+) {
+    if (follows.isEmpty()) {
+        EmptyStateView(
+            emoji = "👥",
+            title = "No followed profiles",
+            subtitle = "Profiles you follow will appear here"
+        )
+    } else {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "${follows.size} followed profile${if (follows.size != 1) "s" else ""}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 12.dp, end = 12.dp, top = 4.dp,
+                    bottom = 120.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(follows) { follow ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth().clickable { /* Navigate to profile */ },
+                        shape = RoundedCornerShape(32.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(56.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        follow.name.firstOrNull()?.uppercase() ?: "?",
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    follow.name,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+                                Text(
+                                    "Followed profile",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

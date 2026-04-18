@@ -46,4 +46,16 @@ class CollectionRepositoryImpl @Inject constructor(
             }
         ).flow
     }
+
+    override fun getPagedCollections(): Flow<PagingData<Collection>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = Constants.DEFAULT_PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                com.rajatt7z.creamie.data.remote.paging.CollectionPagingSource(apiService)
+            }
+        ).flow
+    }
 }

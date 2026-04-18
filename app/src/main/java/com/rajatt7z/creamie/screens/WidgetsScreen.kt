@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Info
@@ -27,15 +28,31 @@ fun WidgetsScreen(navController: NavController) {
     val context = LocalContext.current
     val categories = getAllCategories()
 
-    Surface(
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Box {
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentWindowInsets = WindowInsets.systemBars,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    Toast.makeText(
+                        context,
+                        "💡 Tap any widget to add to home screen",
+                        Toast.LENGTH_LONG
+                    ).show()
+                },
+                modifier = Modifier.padding(bottom = 80.dp)
+            ) {
+                Icon(Icons.Rounded.Info, contentDescription = "Info")
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 120.dp)
             ) {
                 // Info banner at top
                 item {
@@ -43,6 +60,7 @@ fun WidgetsScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.elevatedCardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
@@ -107,7 +125,7 @@ fun WidgetsScreen(navController: NavController) {
                                         )
                                         .show()
                                 },
-                            shape = MaterialTheme.shapes.extraLarge,
+                            shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
@@ -148,24 +166,9 @@ fun WidgetsScreen(navController: NavController) {
                 item { Spacer(Modifier.height(32.dp)) }
             }
 
-            // Floating Info Button (bottom-right)
-            FloatingActionButton(
-                onClick = {
-                    Toast.makeText(
-                        context,
-                        "💡 Tap any widget to add to home screen",
-                        Toast.LENGTH_LONG
-                    ).show()
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            ) {
-                Icon(Icons.Rounded.Info, contentDescription = "Info")
             }
         }
     }
-}
 
 @Preview(showBackground = true)
 @Composable

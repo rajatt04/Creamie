@@ -14,27 +14,27 @@ data class PhotoResponseDto(
 
 data class PhotoDto(
     val id: Int,
-    val width: Int,
-    val height: Int,
-    val url: String,
-    val photographer: String,
-    @SerializedName("photographer_url") val photographerUrl: String,
-    @SerializedName("photographer_id") val photographerId: Long,
+    val width: Int?,
+    val height: Int?,
+    val url: String?,
+    val photographer: String?,
+    @SerializedName("photographer_url") val photographerUrl: String?,
+    @SerializedName("photographer_id") val photographerId: Long?,
     @SerializedName("avg_color") val avgColor: String?,
-    val src: SrcDto,
-    val liked: Boolean,
-    val alt: String
+    val src: SrcDto?,
+    val liked: Boolean?,
+    val alt: String?
 )
 
 data class SrcDto(
-    val original: String,
-    val large2x: String,
-    val large: String,
-    val medium: String,
-    val small: String,
-    val portrait: String,
-    val landscape: String,
-    val tiny: String
+    val original: String?,
+    val large2x: String?,
+    val large: String?,
+    val medium: String?,
+    val small: String?,
+    val portrait: String?,
+    val landscape: String?,
+    val tiny: String?
 )
 
 // ========== Video DTOs ==========
@@ -50,14 +50,14 @@ data class VideoResponseDto(
 
 data class VideoDto(
     val id: Int,
-    val width: Int,
-    val height: Int,
-    val url: String,
-    val image: String, // Thumbnail URL
-    val duration: Int,
-    val user: VideoUserDto,
-    @SerializedName("video_files") val videoFiles: List<VideoFileDto>,
-    @SerializedName("video_pictures") val videoPictures: List<VideoPictureDto>
+    val width: Int?,
+    val height: Int?,
+    val url: String?,
+    val image: String?, // Thumbnail URL
+    val duration: Int?,
+    val user: VideoUserDto?,
+    @SerializedName("video_files") val videoFiles: List<VideoFileDto>?,
+    @SerializedName("video_pictures") val videoPictures: List<VideoPictureDto>?
 )
 
 data class VideoUserDto(
@@ -123,5 +123,6 @@ data class CollectionMediaDto(
     // Video fields
     val image: String?,
     val duration: Int?,
+    val user: VideoUserDto?,
     @SerializedName("video_files") val videoFiles: List<VideoFileDto>?
 )

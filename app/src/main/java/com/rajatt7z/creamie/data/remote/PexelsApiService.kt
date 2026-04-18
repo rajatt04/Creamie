@@ -40,15 +40,7 @@ interface PexelsApiService {
 
     // ========== Videos ==========
 
-    /** Search videos */
-    @GET("videos/search")
-    suspend fun searchVideos(
-        @Query("query") query: String,
-        @Query("orientation") orientation: String? = null,
-        @Query("size") size: String? = null,
-        @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 20
-    ): VideoResponseDto
+
 
     /** Popular videos */
     @GET("videos/popular")

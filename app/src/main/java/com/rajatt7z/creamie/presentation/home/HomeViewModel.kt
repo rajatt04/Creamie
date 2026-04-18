@@ -7,8 +7,10 @@ import androidx.paging.cachedIn
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.domain.model.Collection
 import com.rajatt7z.creamie.domain.model.Photo
+import com.rajatt7z.creamie.domain.model.Video
 import com.rajatt7z.creamie.domain.repository.CollectionRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
+import com.rajatt7z.creamie.domain.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,11 +29,16 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     photoRepository: PhotoRepository,
-    private val collectionRepository: CollectionRepository
+    private val collectionRepository: CollectionRepository,
+    videoRepository: VideoRepository
 ) : ViewModel() {
 
     val curatedPhotos: Flow<PagingData<Photo>> = photoRepository
         .getCuratedPhotos()
+        .cachedIn(viewModelScope)
+
+    val popularVideos: Flow<PagingData<Video>> = videoRepository
+        .getPopularVideos()
         .cachedIn(viewModelScope)
 
     private val _uiState = MutableStateFlow(HomeUiState())

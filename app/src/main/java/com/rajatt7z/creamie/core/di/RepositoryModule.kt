@@ -27,4 +27,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVideoRepository(impl: VideoRepositoryImpl): VideoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFollowsRepository(impl: FollowsRepositoryImpl): FollowsRepository
 }

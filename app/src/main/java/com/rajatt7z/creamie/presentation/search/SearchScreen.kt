@@ -1,17 +1,16 @@
 package com.rajatt7z.creamie.presentation.search
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,41 +18,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.AsyncImage
-import com.rajatt7z.creamie.core.common.Constants
-import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
-import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
-    onPhotoClick: (Int) -> Unit,
-    onBack: () -> Unit,
+    onSearchPhotos: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val pagingItems = viewModel.searchResults.collectAsLazyPagingItems()
+    var currentQuery by remember { mutableStateOf("") }
+    val suggestedQueries = remember { 
+        listOf("Nature", "Minimal", "Coding", "Abstract", "Aesthetic", "Dark", "Neon", "City", "Cars", "Space", "Animals", "Architecture", "Technology", "Fashion", "Travel") 
+    }
 
     Scaffold(
         topBar = {
-            // iOS Glassmorphism Style Search Bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(WindowInsets.statusBars.asPaddingValues())
                     .padding(horizontal = 24.dp, vertical = 24.dp)
             ) {
-                // Glass Background
                 Box(
                     modifier = Modifier
                         .matchParentSize()
@@ -69,41 +60,37 @@ fun SearchScreen(
                                 )
                             )
                         )
-                ) {
-                    // Optional: You could use Modifier.blur(20.dp) here if RenderEffect is supported, 
-                    // but alpha + gradient simulates it well across Android versions
-                }
+                )
 
-                // Inner content
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    Icon(
+                        Icons.Default.Search, 
+                        contentDescription = "Search",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
                     
                     androidx.compose.foundation.text.BasicTextField(
-                        value = uiState.query,
-                        onValueChange = viewModel::onQueryChange,
+                        value = currentQuery,
+                        onValueChange = { currentQuery = it },
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 8.dp),
+                            .padding(vertical = 12.dp),
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         ),
                         singleLine = true,
                         decorationBox = { innerTextField ->
-                            if (uiState.query.isEmpty()) {
+                            if (currentQuery.isEmpty()) {
                                 Text(
-                                    text = "Search wallpapers...",
+                                    text = "Search images...",
                                     style = MaterialTheme.typography.bodyLarge.copy(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                         fontWeight = FontWeight.Medium
@@ -113,147 +100,105 @@ fun SearchScreen(
                             innerTextField()
                         }
                     )
-
-                    Row {
-                        if (uiState.query.isNotEmpty()) {
-                            IconButton(onClick = { 
-                                viewModel.onQueryChange("") 
-                            }) {
-                                Icon(
-                                    Icons.Default.Clear, 
-                                    contentDescription = "Clear",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        IconButton(onClick = viewModel::toggleFilterSheet) {
-                            Icon(
-                                Icons.Default.FilterList, 
-                                contentDescription = "Filters",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
                 }
             }
-        },
-        
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Show search history when query is empty
-            if (uiState.query.isEmpty()) {
-                SearchHistorySection(
-                    history = uiState.searchHistory,
-                    onItemClick = viewModel::onHistoryItemClick,
-                    onDeleteItem = viewModel::onDeleteHistory,
-                    onClearAll = viewModel::onClearAllHistory
-                )
-            } else {
-                // Search results grid
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(2),
-                    contentPadding = PaddingValues(
-                        start = 12.dp, end = 12.dp, top = 12.dp, 
-                        bottom = 120.dp // padding for the glassy bottom navigation bar
-                    ),
-                    verticalItemSpacing = 12.dp,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+            
+            if (currentQuery.isNotEmpty()) {
+                val matchingSuggestions = remember(currentQuery, uiState.searchHistory) {
+                    val combined = (uiState.searchHistory + suggestedQueries).distinct()
+                    combined.filter { it.contains(currentQuery, ignoreCase = true) && !it.equals(currentQuery, ignoreCase = true) }
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
-                    // Loading shimmer
-                    if (pagingItems.loadState.refresh is LoadState.Loading) {
-                        items(6) { ShimmerPhotoCard(modifier = Modifier.fillMaxWidth()) }
-                    }
-
-                    // Results
-                    items(
-                        count = pagingItems.itemCount
-                    ) { index ->
-                        pagingItems[index]?.let { photo ->
-                            AnimatedPhotoCard(
-                                photo = photo,
-                                index = index,
-                                onClick = { onPhotoClick(photo.id) }
-                            )
-                        }
-                    }
-
-                    // Empty state
-                    if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.itemCount == 0) {
-                        item(span = StaggeredGridItemSpan.FullLine) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(48.dp),
-                                contentAlignment = Alignment.Center
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                            Text("Search for", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Button(
+                                onClick = { 
+                                    viewModel.onSearch(currentQuery)
+                                    onSearchPhotos(android.net.Uri.encode(currentQuery))
+                                },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp)
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("🔍", fontSize = 48.sp)
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        "No results found",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        "Try different keywords or filters",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                                Icon(Icons.Default.Search, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("\"$currentQuery\"", style = MaterialTheme.typography.titleMedium)
                             }
                         }
                     }
+
+                    if (matchingSuggestions.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Suggestions",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(matchingSuggestions) { suggestion ->
+                            ListItem(
+                                headlineContent = { Text(suggestion, fontWeight = FontWeight.Medium) },
+                                leadingContent = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        currentQuery = suggestion
+                                        viewModel.onSearch(suggestion)
+                                        onSearchPhotos(android.net.Uri.encode(suggestion))
+                                    },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                            )
+                        }
+                    }
                 }
+            } else {
+                // History
+                SearchHistorySection(
+                    history = uiState.searchHistory,
+                    suggestions = suggestedQueries,
+                    onItemClick = { query -> 
+                        currentQuery = query 
+                        viewModel.onSearch(query)
+                        onSearchPhotos(android.net.Uri.encode(query))
+                    },
+                    onDeleteItem = viewModel::onDeleteHistory,
+                    onClearAll = viewModel::onClearAllHistory
+                )
             }
         }
     }
-
-    // Filter bottom sheet
-    if (uiState.isFilterSheetVisible) {
-        FilterBottomSheet(
-            currentFilters = uiState.filters,
-            onDismiss = viewModel::toggleFilterSheet,
-            onApply = { filters ->
-                viewModel.updateFilters(filters)
-                viewModel.toggleFilterSheet()
-            }
-        )
-    }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun SearchHistorySection(
     history: List<String>,
+    suggestions: List<String>,
     onItemClick: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
     onClearAll: () -> Unit
 ) {
-    if (history.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🔍", fontSize = 48.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    "Search for wallpapers",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    "Nature, abstract, minimal, dark...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp)
-        ) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
+    ) {
+        if (history.isNotEmpty()) {
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -262,156 +207,95 @@ private fun SearchHistorySection(
                 ) {
                     Text(
                         "Recent Searches",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                     )
                     TextButton(onClick = onClearAll) {
-                        Text("Clear All")
+                        Text("Clear All", fontWeight = FontWeight.Medium)
                     }
                 }
             }
             items(history) { query ->
                 ListItem(
-                    headlineContent = { Text(query) },
-                    leadingContent = { Icon(Icons.Default.History, contentDescription = null) },
+                    headlineContent = { Text(query, fontWeight = FontWeight.Medium) },
+                    leadingContent = { Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     trailingContent = {
                         IconButton(onClick = { onDeleteItem(query) }) {
-                            Icon(Icons.Default.Close, contentDescription = "Delete")
+                            Icon(Icons.Default.Close, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     },
-                    modifier = Modifier.clickable { onItemClick(query) }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onItemClick(query) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
             }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+        } else {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(88.dp)
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(44.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            "What are you looking for?",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Try searching for some ideas below",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FilterBottomSheet(
-    currentFilters: SearchFilters,
-    onDismiss: () -> Unit,
-    onApply: (SearchFilters) -> Unit
-) {
-    var orientation by remember { mutableStateOf(currentFilters.orientation) }
-    var size by remember { mutableStateOf(currentFilters.size) }
-    var color by remember { mutableStateOf(currentFilters.color) }
-
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-        containerColor = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 24.dp)
-        ) {
-            Text(
-                "Search Filters",
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Orientation
-            Text("Orientation", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
-            Spacer(modifier = Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                item {
-                    FilterChip(
-                        selected = orientation == null,
-                        onClick = { orientation = null },
-                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-                items(Constants.PEXELS_ORIENTATIONS) { opt ->
-                    FilterChip(
-                        selected = orientation == opt,
-                        onClick = { orientation = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Size
-            Text("Size", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
-            Spacer(modifier = Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                item {
-                    FilterChip(
-                        selected = size == null,
-                        onClick = { size = null },
-                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-                items(Constants.PEXELS_SIZES) { opt ->
-                    FilterChip(
-                        selected = size == opt,
-                        onClick = { size = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Color
-            Text("Color", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary))
-            Spacer(modifier = Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                item {
-                    FilterChip(
-                        selected = color == null,
-                        onClick = { color = null },
-                        label = { Text("Any", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-                items(Constants.PEXELS_COLORS) { opt ->
-                    FilterChip(
-                        selected = color == opt,
-                        onClick = { color = opt },
-                        label = { Text(opt.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        onApply(SearchFilters())
-                    },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(28.dp)
+        item {
+            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                Text(
+                    "Suggested Searches",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Reset", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                }
-                Button(
-                    onClick = {
-                        onApply(SearchFilters(orientation, size, color))
-                    },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(28.dp)
-                ) {
-                    Text("Apply Filters", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    suggestions.forEach { suggestion ->
+                        Surface(
+                            onClick = { onItemClick(suggestion) },
+                            shape = RoundedCornerShape(100),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.clip(RoundedCornerShape(100))
+                        ) {
+                            Text(
+                                text = suggestion,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

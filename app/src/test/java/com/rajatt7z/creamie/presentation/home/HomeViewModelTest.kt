@@ -3,11 +3,11 @@ package com.rajatt7z.creamie.presentation.home
 import app.cash.turbine.test
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.domain.model.Collection
-import com.rajatt7z.creamie.domain.model.Photo
-import com.rajatt7z.creamie.domain.model.WallpaperSrc
 import com.rajatt7z.creamie.domain.repository.CollectionRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
+import com.rajatt7z.creamie.domain.repository.VideoRepository
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,7 +17,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -27,6 +31,7 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var photoRepository: PhotoRepository
     private lateinit var collectionRepository: CollectionRepository
+    private lateinit var videoRepository: VideoRepository
     private lateinit var viewModel: HomeViewModel
 
     @Before
@@ -34,6 +39,7 @@ class HomeViewModelTest {
         Dispatchers.setMain(testDispatcher)
         photoRepository = mockk()
         collectionRepository = mockk()
+        videoRepository = mockk()
     }
 
     @After
@@ -45,8 +51,9 @@ class HomeViewModelTest {
     fun `initial state has loading collections`() = runTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(emptyList())
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
+        every { videoRepository.getPopularVideos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -71,8 +78,9 @@ class HomeViewModelTest {
         )
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(mockCollections)
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
+        every { videoRepository.getPopularVideos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -88,8 +96,9 @@ class HomeViewModelTest {
     fun `featured collections error sets error message`() = runTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Error("Network error")
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
+        every { videoRepository.getPopularVideos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -104,8 +113,9 @@ class HomeViewModelTest {
     fun `trending searches are pre-populated`() = runTest {
         coEvery { collectionRepository.getFeaturedCollections() } returns NetworkResult.Success(emptyList())
         coEvery { photoRepository.getCuratedPhotos() } returns flowOf()
+        every { videoRepository.getPopularVideos() } returns flowOf()
 
-        viewModel = HomeViewModel(photoRepository, collectionRepository)
+        viewModel = HomeViewModel(photoRepository, collectionRepository, videoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {

@@ -10,6 +10,8 @@ import android.os.Looper
 import android.widget.RemoteViews
 import com.rajatt7z.creamie.R
 import com.rajatt7z.creamie.AppWidgets.DigitalClockAppWidget
+import com.rajatt7z.creamie.AppWidgets.AnalogClockAppWidget
+import com.rajatt7z.creamie.AppWidgets.updateAnalogAppWidget
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,23 +46,38 @@ class ClockUpdateService : Service() {
     private fun updateAllWidgets() {
         val context = applicationContext
         val appWidgetManager = AppWidgetManager.getInstance(context)
-        val component = ComponentName(context, DigitalClockAppWidget::class.java)
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(component)
+        
+        // Digital Clock
+        val digitalComponent = ComponentName(context, DigitalClockAppWidget::class.java)
+        val digitalIds = appWidgetManager.getAppWidgetIds(digitalComponent)
+        
+        // Analog Clock
+        val analogComponent = ComponentName(context, AnalogClockAppWidget::class.java)
+        val analogIds = appWidgetManager.getAppWidgetIds(analogComponent)
 
-        if (appWidgetIds.isEmpty()) {
+        if (digitalIds.isEmpty() && analogIds.isEmpty()) {
             stopSelf()
             return
         }
 
-        val timeFormat = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
-        val dateFormat = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
-        val now = Date()
+        if (digitalIds.isNotEmpty()) {
+            val timeFormat = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
+            val now = Date()
 
-        for (id in appWidgetIds) {
-            val views = RemoteViews(context.packageName, R.layout.widget_digital_clock)
-            views.setTextViewText(R.id.clock_time, timeFormat.format(now))
-            views.setTextViewText(R.id.clock_date, dateFormat.format(now))
-            appWidgetManager.updateAppWidget(id, views)
+            for (id in digitalIds) {
+                val views = RemoteViews(context.packageName, R.layout.widget_digital_clock)
+                views.setTextViewText(R.id.clock_time, timeFormat.format(now))
+                views.setTextViewText(R.id.clock_date, dateFormat.format(now))
+                appWidgetManager.updateAppWidget(id, views)
+            }
+        }
+        
+        if (analogIds.isNotEmpty()) {
+            for (id in analogIds) {
+                // We use our helper method to redraw the bitmap and update the widget
+                updateAnalogAppWidget(context, appWidgetManager, id)
+            }
         }
     }
 }

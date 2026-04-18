@@ -80,3 +80,11 @@ data class RemoteKeyEntity(
     val prevPage: Int?,
     val createdAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "follows")
+data class FollowedEntity(
+    @PrimaryKey val photographerId: Long,
+    val name: String,
+    val url: String,
+    val followedAt: Long = System.currentTimeMillis()
+)

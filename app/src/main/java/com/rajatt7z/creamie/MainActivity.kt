@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
             }
 
             val startDestination = if (preferences!!.onboardingShown) {
-                Routes.HOME
+                Routes.DISCOVER
             } else {
                 Routes.ONBOARDING
             }

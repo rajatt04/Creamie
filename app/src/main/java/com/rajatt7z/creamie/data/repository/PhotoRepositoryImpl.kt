@@ -65,4 +65,12 @@ class PhotoRepositoryImpl @Inject constructor(
             apiService.getPhoto(id).toDomain()
         }
     }
+
+    override suspend fun getCuratedPage(page: Int, perPage: Int): NetworkResult<List<Photo>> {
+        return safeApiCall {
+            val randomPage = (1..5).random() // Add variety to related content
+            apiService.getCuratedPhotos(page = randomPage, perPage = perPage)
+                .photos.map { it.toDomain() }
+        }
+    }
 }

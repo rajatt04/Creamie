@@ -8,6 +8,10 @@
     <!-- Wallpaper -->
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
+    <!-- Location -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- Storage (legacy, for Android <= 9) -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -93,6 +97,28 @@
                 android:resource="@xml/digital_clock_widget_info" />
         </receiver>
 
+        <!-- Analog Clock widget -->
+        <receiver android:name=".AppWidgets.AnalogClockAppWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/analog_clock_widget_info" />
+        </receiver>
+
+        <!-- iOS Weather Widget -->
+        <receiver android:name=".presentation.widget.IosWeatherWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ios_weather_widget_info" />
+        </receiver>
+
         <!-- FileProvider for sharing wallpapers -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -104,7 +130,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Wallpaper of the Day widget -->
         <receiver android:name=".presentation.widget.WallpaperOfTheDayWidgetReceiver"
             android:exported="true">
             <intent-filter>
@@ -113,6 +138,17 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/wallpaper_of_the_day_widget_info" />
+        </receiver>
+
+        <!-- Calendar Widget -->
+        <receiver android:name=".presentation.widget.CalendarWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/calendar_widget_info" />
         </receiver>
 
         <!-- Remove default WorkManagerInitializer for on-demand initialization -->

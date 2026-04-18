@@ -1,5 +1,9 @@
 package com.rajatt7z.creamie.presentation.onboarding
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -56,6 +60,29 @@ private val onboardingPages = listOf(
 fun OnboardingScreen(
     onComplete: () -> Unit
 ) {
+    // Build the list of runtime permissions to request
+    val permissionsToRequest = remember {
+        buildList {
+            // Location permissions
+            add(Manifest.permission.ACCESS_COARSE_LOCATION)
+            add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+            // Media / Photos permission (version-appropriate)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.READ_MEDIA_IMAGES)
+            } else {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }.toTypedArray()
+    }
+
+    // Launcher: fires the system permission dialog, then completes onboarding
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* results: Map<String, Boolean> — proceed regardless of grant/deny */
+        onComplete()
+    }
+
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val scope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == onboardingPages.size - 1
@@ -154,7 +181,7 @@ fun OnboardingScreen(
                     exit = fadeOut() + slideOutHorizontally { -it / 2 }
                 ) {
                     TextButton(
-                        onClick = onComplete,
+                        onClick = { permissionLauncher.launch(permissionsToRequest) },
                         modifier = Modifier.height(56.dp)
                     ) {
                         Text(
@@ -182,7 +209,7 @@ fun OnboardingScreen(
                 Button(
                     onClick = {
                         if (isLastPage) {
-                            onComplete()
+                            permissionLauncher.launch(permissionsToRequest)
                         } else {
                             scope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)

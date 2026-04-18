@@ -44,4 +44,7 @@ object DatabaseModule {
 
     @Provides
     fun provideRemoteKeyDao(db: CreamieDatabase): RemoteKeyDao = db.remoteKeyDao()
+
+    @Provides
+    fun provideFollowedDao(db: CreamieDatabase): FollowedDao = db.followedDao()
 }

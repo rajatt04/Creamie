@@ -1,23 +1,22 @@
 package com.rajatt7z.creamie.presentation.detail
 
-import android.app.WallpaperManager
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.data.repository.DownloadRepository
 import com.rajatt7z.creamie.data.repository.WallpaperSetterRepository
 import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.repository.FavoritesRepository
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +31,9 @@ data class DetailUiState(
     val message: String? = null,
     val selectedQuality: String = "large2x",
     val colorPalette: List<Int> = emptyList(),
-    val showWallpaperDialog: Boolean = false
+    val showWallpaperDialog: Boolean = false,
+    val isFollowing: Boolean = false,
+    val cropHint: android.graphics.Rect? = null
 )
 
 @HiltViewModel
@@ -41,7 +42,8 @@ class DetailViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val favoritesRepository: FavoritesRepository,
     private val downloadRepository: DownloadRepository,
-    private val wallpaperSetterRepository: WallpaperSetterRepository
+    private val wallpaperSetterRepository: WallpaperSetterRepository,
+    private val followsRepository: FollowsRepository
 ) : ViewModel() {
 
     private val photoId: Int = savedStateHandle["photoId"] ?: 0
@@ -66,6 +68,7 @@ class DetailViewModel @Inject constructor(
                             error = null
                         )
                     }
+                    observeFollowing(result.data.photographerId)
                 }
                 is NetworkResult.Error -> {
                     _uiState.update {
@@ -92,6 +95,25 @@ class DetailViewModel @Inject constructor(
         val photo = _uiState.value.photo ?: return
         viewModelScope.launch {
             favoritesRepository.toggleFavorite(photo)
+        }
+    }
+
+    private fun observeFollowing(photographerId: Long) {
+        viewModelScope.launch {
+            followsRepository.isFollowed(photographerId).collect { isFollowing ->
+                _uiState.update { it.copy(isFollowing = isFollowing) }
+            }
+        }
+    }
+
+    fun toggleFollow() {
+        val photo = _uiState.value.photo ?: return
+        viewModelScope.launch {
+            followsRepository.toggleFollow(
+                photographerId = photo.photographerId,
+                name = photo.photographer,
+                url = photo.photographerUrl
+            )
         }
     }
 
@@ -130,13 +152,18 @@ class DetailViewModel @Inject constructor(
         _uiState.update { it.copy(showWallpaperDialog = false) }
     }
 
+    fun setCropHint(rect: android.graphics.Rect?) {
+        _uiState.update { it.copy(cropHint = rect) }
+    }
+
     fun setWallpaper(flag: Int) {
         val photo = _uiState.value.photo ?: return
         val quality = _uiState.value.selectedQuality
+        val cropHint = _uiState.value.cropHint
         val url = photo.src.forQuality(quality)
         viewModelScope.launch {
             _uiState.update { it.copy(isSettingWallpaper = true, showWallpaperDialog = false) }
-            wallpaperSetterRepository.setWallpaper(url, flag).fold(
+            wallpaperSetterRepository.setWallpaper(url, flag, cropHint).fold(
                 onSuccess = { msg ->
                     _uiState.update {
                         it.copy(isSettingWallpaper = false, message = msg)
@@ -178,7 +205,7 @@ class DetailViewModel @Inject constructor(
 
                 // Recycle the copy if we made one
                 if (safeBitmap !== bitmap) safeBitmap.recycle()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Silently fail — color palette is cosmetic
             }
         }

@@ -13,4 +13,6 @@ interface CollectionRepository {
     suspend fun getCollections(page: Int = 1): NetworkResult<List<Collection>>
 
     fun getCollectionMedia(collectionId: String): Flow<PagingData<Photo>>
+
+    fun getPagedCollections(): Flow<PagingData<Collection>>
 }

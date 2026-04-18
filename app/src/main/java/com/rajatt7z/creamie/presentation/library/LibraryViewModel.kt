@@ -11,16 +11,21 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.rajatt7z.creamie.domain.model.FollowedPhotographer
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
+
 data class LibraryUiState(
     val selectedTab: Int = 0,
     val favorites: List<Photo> = emptyList(),
-    val downloads: List<DownloadHistoryEntity> = emptyList()
+    val downloads: List<DownloadHistoryEntity> = emptyList(),
+    val follows: List<FollowedPhotographer> = emptyList()
 )
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
-    private val downloadHistoryDao: DownloadHistoryDao
+    private val downloadHistoryDao: DownloadHistoryDao,
+    private val followsRepository: FollowsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryUiState())
@@ -35,6 +40,11 @@ class LibraryViewModel @Inject constructor(
         viewModelScope.launch {
             downloadHistoryDao.getAllDownloads().collect { downloads ->
                 _uiState.update { it.copy(downloads = downloads) }
+            }
+        }
+        viewModelScope.launch {
+            followsRepository.getAllFollows().collect { f ->
+                _uiState.update { it.copy(follows = f) }
             }
         }
     }

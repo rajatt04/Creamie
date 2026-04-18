@@ -1,21 +1,37 @@
 package com.rajatt7z.creamie.presentation.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -60,9 +76,9 @@ fun AnimatedBottomNavigationBar(
         label = "indicator_offset_x"
     )
 
-    // Ultra glassy transparent background
-    val barBackgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
-    val barBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    // Completely transparent background
+    val barBackgroundColor = Color.Transparent
+    val barBorderColor = Color.Transparent
     
     // The accent color for the highlight
     val indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
@@ -70,11 +86,8 @@ fun AnimatedBottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
             .height(72.dp)
-            .clip(RoundedCornerShape(36.dp)) // Super rounded pill shape
             .background(barBackgroundColor)
-            .border(1.dp, barBorderColor, RoundedCornerShape(36.dp))
     ) {
         
         // The moving highlight indicator placed explicitly using an animated offset
@@ -91,7 +104,7 @@ fun AnimatedBottomNavigationBar(
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEachIndexed { index, item ->
@@ -130,7 +143,7 @@ fun AnimatedBottomNavigationBar(
 
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .width(54.dp)
                         .fillMaxHeight()
                         .onGloballyPositioned { coordinates ->
                             val newPositions = itemPositions.toMutableList()

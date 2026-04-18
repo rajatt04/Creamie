@@ -23,7 +23,7 @@ class CollectionMediaPagingSource(
         return try {
             val response = apiService.getCollectionMedia(
                 id = collectionId,
-                type = "photos",
+                type = null,
                 page = page,
                 perPage = params.loadSize
             )

@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.rajatt7z.creamie"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rajatt7z.creamie"
@@ -113,6 +113,7 @@ dependencies {
 
     // Hilt DI
     implementation(libs.hilt.android)
+    implementation(libs.androidx.media3.exoplayer)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.work)
@@ -171,6 +172,14 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    // Media3 (ExoPlayer)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+
     // Debug tools
     debugImplementation(libs.leakcanary)
+
+    // Location
+    implementation(libs.play.services.location)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 }

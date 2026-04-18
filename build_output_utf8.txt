@@ -1,0 +1,150 @@
+﻿> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+
+> Task :app:compileDebugKotlin FAILED
+./gradlew : e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/m
+ain/java/com/rajatt7z/creamie/data/remote/paging/CollectionPagingSource.
+kt:28:37 Unresolved reference 'PER_PAGE'.
+At line:1 char:1
++ ./gradlew assembleDebug --console=plain > build_output.log 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///C:/U...nce 'PER 
+   _PAGE'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/data/repository/VideoRepositoryImpl.kt:7:34 
+Unresolved reference 'mappers'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/data/repository/VideoRepositoryImpl.kt:43:44 
+Unresolved reference 'toDomain'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/collections/CollectionDetailsScreen.kt:76
+:25 No value passed for parameter 'isVideo'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:61:42 
+Unresolved reference 'sp'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:235:26 This 
+material API is experimental and is likely to change or to be removed 
+in the future.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:236:9 This 
+material API is experimental and is likely to change or to be removed 
+in the future.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:238:26 This 
+material API is experimental and is likely to change or to be removed 
+in the future.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:249:44 
+Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:249:63 
+Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:249:74 None 
+of the following candidates is applicable:
+fun times(other: Byte): Int
+fun times(other: Double): Double
+fun times(other: Float): Float
+fun times(other: Int): Int
+fun times(other: Long): Long
+fun times(other: Short): Int
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerScreen.kt:261:46 
+Unresolved reference 'fps'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:7:41 
+Unresolved reference 'DownloadManagerUtil'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:51:13 
+'when' expression must be exhaustive. Add the 'Empty', 'Loading' 
+branches or an 'else' branch.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:55:60 
+Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:55:72 
+Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:55:83 
+None of the following candidates is applicable:
+fun times(other: Byte): Int
+fun times(other: Double): Double
+fun times(other: Float): Float
+fun times(other: Int): Int
+fun times(other: Long): Long
+fun times(other: Short): Int
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/detail/VideoPlayerViewModel.kt:92:17 
+Unresolved reference 'DownloadManagerUtil'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/navigation/CreamieNavGraph.kt:116:41 
+Argument type mismatch: actual type is 'kotlin.Function2<kotlin.String, 
+ERROR CLASS: Cannot infer type for parameter title, kotlin.Unit>', but 
+'kotlin.Function1<kotlin.String, kotlin.Unit>' was expected.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/navigation/CreamieNavGraph.kt:116:47 
+Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/profile/PhotographerProfileScreen.kt:118:
+25 No value passed for parameter 'isVideo'.
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/search/PhotoSearchViewModel.kt:17:12 
+Redeclaration:
+data class SearchFilters : Any
+e: file:///C:/Users/arsenic/StudioProjects/Creamie/app/src/main/java/com
+/rajatt7z/creamie/presentation/search/SearchViewModel.kt:19:12 
+Redeclaration:
+data class SearchFilters : Any
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner
+.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 8s
+30 actionable tasks: 1 executed, 29 up-to-date

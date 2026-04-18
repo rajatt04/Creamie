@@ -4,20 +4,69 @@ import android.app.WallpaperManager
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,10 +78,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.rajatt7z.creamie.core.common.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,11 +87,13 @@ import com.rajatt7z.creamie.core.common.Constants
 fun DetailScreen(
     onBack: () -> Unit,
     onColorSearch: (String) -> Unit,
+    onPhotographerClick: (String) -> Unit,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val uriHandler = LocalUriHandler.current
+    LocalUriHandler.current
+    var isUiVisible by remember { mutableStateOf(true) }
 
     // Heart animation
     val heartScale by animateFloatAsState(
@@ -94,12 +143,38 @@ fun DetailScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val screenAspect = configuration.screenWidthDp.toFloat() / configuration.screenHeightDp.toFloat()
+            val imageAspect = if (photo.height > 0) photo.width.toFloat() / photo.height.toFloat() else 1f
+            val isLandscapeWider = imageAspect > screenAspect
+
+            val horizontalScrollState = rememberScrollState()
+            val verticalScrollState = rememberScrollState()
+
+            LaunchedEffect(horizontalScrollState.maxValue, verticalScrollState.maxValue) {
+                if (isLandscapeWider && horizontalScrollState.maxValue > 0) {
+                    horizontalScrollState.scrollTo(horizontalScrollState.maxValue / 2)
+                } else if (!isLandscapeWider && verticalScrollState.maxValue > 0) {
+                    verticalScrollState.scrollTo(verticalScrollState.maxValue / 2)
+                }
+            }
+
             // Full-screen image
             AsyncImage(
                 model = photo.src.large2x,
                 contentDescription = photo.alt,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .then(
+                        if (isLandscapeWider) Modifier.fillMaxHeight().horizontalScroll(horizontalScrollState)
+                        else Modifier.fillMaxWidth().verticalScroll(verticalScrollState)
+                    )
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        isUiVisible = !isUiVisible
+                    },
+                contentScale = if (isLandscapeWider) ContentScale.FillHeight else ContentScale.FillWidth,
                 onSuccess = { result ->
                     val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
                     bitmap?.let { viewModel.extractColors(it) }
@@ -107,13 +182,19 @@ fun DetailScreen(
             )
 
             // Top Action Pills
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+            AnimatedVisibility(
+                visible = isUiVisible,
+                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                 // Back Button
                 IconButton(
                     onClick = onBack,
@@ -150,26 +231,28 @@ fun DetailScreen(
                     }
                 }
             }
+        }
 
             // Bottom Glassmorphic Panel
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
-                    .navigationBarsPadding()
-                    .padding(horizontal = 32.dp, vertical = 32.dp)
+            AnimatedVisibility(
+                visible = isUiVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
+                        .navigationBarsPadding()
+                        .padding(horizontal = 32.dp, vertical = 32.dp)
+                ) {
                 // Photographer info
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            if (photo.photographerUrl.isNotEmpty()) {
-                                uriHandler.openUri(photo.photographerUrl)
-                            }
-                        },
+                        .clickable { onPhotographerClick(photo.photographer) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
@@ -193,10 +276,34 @@ fun DetailScreen(
                             photo.photographer,
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
-                        Text(
-                            "View on Pexels \u2192",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "View Portfolio \u2192",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "• ${photo.width} x ${photo.height} px",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val isFollowing = uiState.isFollowing
+                    IconButton(
+                        onClick = { viewModel.toggleFollow() },
+                        modifier = Modifier.size(36.dp).background(
+                            color = if (isFollowing) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onBackground,
+                            shape = CircleShape
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isFollowing) Icons.Default.Check else Icons.Default.PersonAdd,
+                            contentDescription = if (isFollowing) "Following" else "Follow",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (isFollowing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.background
                         )
                     }
                 }
@@ -310,6 +417,7 @@ fun DetailScreen(
                     }
                 }
             }
+        }
         }
     }
 
