@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:background="@drawable/widget_background">
 
     <!-- Scale type fitCenter keeps the aspect ratio intact and fits inside the widget bounds. -->
     <!-- The custom bitmap drawing handles the rounded corners and the clock face. -->
@@ -12,6 +13,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:scaleType="fitCenter"
+        android:src="@drawable/ic_clock"
         android:contentDescription="@string/analog_clock_widget_description" />
 
 </FrameLayout>

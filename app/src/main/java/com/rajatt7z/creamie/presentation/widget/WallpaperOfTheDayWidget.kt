@@ -13,17 +13,27 @@ import androidx.glance.appwidget.*
 import androidx.glance.layout.*
 import androidx.glance.text.*
 import androidx.glance.color.ColorProvider
+import androidx.glance.ColorFilter
 import com.rajatt7z.creamie.MainActivity
+import com.rajatt7z.creamie.R
 import com.rajatt7z.creamie.data.worker.DailyWallpaperWorker
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
+import android.content.Intent
+import android.net.Uri
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.glance.state.GlanceStateDefinition
+import androidx.glance.state.PreferencesGlanceStateDefinition
 
 /**
  * Glance-based "Wallpaper of the Day" widget.
  * Shows a cached daily wallpaper with a subtle overlay.
  */
 class WallpaperOfTheDayWidget : GlanceAppWidget() {
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
     companion object {
         private val SMALL = DpSize(130.dp, 130.dp)
@@ -37,7 +47,9 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            WidgetContent()
+            GlanceTheme {
+                WidgetContent()
+            }
         }
     }
 
@@ -50,11 +62,26 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
         val dateFormat = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
         val today = dateFormat.format(Date())
 
+        val photoId = currentState<Preferences>()[intPreferencesKey("photo_id")]
+        
+        val clickModifier = if (photoId != null) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("creamie://wallpaper/$photoId")
+            ).apply {
+                setPackage(context.packageName)
+            }
+            GlanceModifier.clickable(androidx.glance.appwidget.action.actionStartActivity(intent))
+        } else {
+            GlanceModifier.clickable(actionStartActivity<MainActivity>())
+        }
+
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
+                .background(GlanceTheme.colors.surface)
                 .cornerRadius(24.dp)
-                .clickable(actionStartActivity<MainActivity>())
+                .then(clickModifier)
         ) {
             // Background image
             if (cacheFile.exists()) {
@@ -88,6 +115,28 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
                 }
             }
 
+            // Refresh Button at Top Right
+            Row(
+                modifier = GlanceModifier.fillMaxWidth().padding(12.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                Box(
+                    modifier = GlanceModifier
+                        .size(32.dp)
+                        .background(GlanceTheme.colors.surfaceVariant)
+                        .cornerRadius(16.dp)
+                        .clickable(androidx.glance.appwidget.action.actionRunCallback<RefreshWallpaperAction>()),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_refresh_widget),
+                        contentDescription = "Refresh Wallpaper",
+                        modifier = GlanceModifier.size(18.dp),
+                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant)
+                    )
+                }
+            }
+
             // Overlay content
             Column(
                 modifier = GlanceModifier
@@ -98,10 +147,7 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
                 Text(
                     text = "WALLPAPER OF THE DAY",
                     style = TextStyle(
-                        color = ColorProvider(
-                            day = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-                            night = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)
-                        ),
+                        color = GlanceTheme.colors.onSurface,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -112,10 +158,7 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
                     Text(
                         text = today,
                         style = TextStyle(
-                            color = ColorProvider(
-                                day = androidx.compose.ui.graphics.Color.White,
-                                night = androidx.compose.ui.graphics.Color.White
-                            ),
+                            color = GlanceTheme.colors.onSurface,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -126,10 +169,7 @@ class WallpaperOfTheDayWidget : GlanceAppWidget() {
                 Text(
                     text = "Tap to explore →",
                     style = TextStyle(
-                        color = ColorProvider(
-                            day = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f),
-                            night = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f)
-                        ),
+                        color = GlanceTheme.colors.onSurfaceVariant,
                         fontSize = 11.sp
                     )
                 )
@@ -149,6 +189,21 @@ class WallpaperOfTheDayWidgetReceiver : GlanceAppWidgetReceiver() {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         
         // Enqueue the worker to fetch the image and update the widget
+        val request = androidx.work.OneTimeWorkRequestBuilder<DailyWallpaperWorker>().build()
+        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+            "widget_update_work",
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            request
+        )
+    }
+}
+
+class RefreshWallpaperAction : androidx.glance.appwidget.action.ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: androidx.glance.action.ActionParameters
+    ) {
         val request = androidx.work.OneTimeWorkRequestBuilder<DailyWallpaperWorker>().build()
         androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
             "widget_update_work",

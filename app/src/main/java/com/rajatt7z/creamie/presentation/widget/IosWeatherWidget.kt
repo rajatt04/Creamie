@@ -15,22 +15,65 @@ import androidx.glance.color.ColorProvider
 import com.rajatt7z.creamie.MainActivity
 import com.rajatt7z.creamie.R
 
+import android.appwidget.AppWidgetManager
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
+
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.state.GlanceStateDefinition
+import androidx.glance.state.PreferencesGlanceStateDefinition
+
+object WeatherWidgetKeys {
+    val locationName = stringPreferencesKey("location_name")
+    val currentTemp = intPreferencesKey("current_temp")
+    val conditionIcon = stringPreferencesKey("condition_icon")
+    val maxTemp = intPreferencesKey("max_temp")
+    val minTemp = intPreferencesKey("min_temp")
+    val precipitationInfo = stringPreferencesKey("precipitation_info")
+    val feelsLike = intPreferencesKey("feels_like")
+}
+
 class IosWeatherWidget : GlanceAppWidget() {
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            WeatherWidgetContent()
+            GlanceTheme {
+                val prefs = currentState<Preferences>()
+                val locName = prefs[WeatherWidgetKeys.locationName] ?: "My Location"
+                val temp = prefs[WeatherWidgetKeys.currentTemp] ?: 61
+                val icon = prefs[WeatherWidgetKeys.conditionIcon] ?: "⛅"
+                val maxT = prefs[WeatherWidgetKeys.maxTemp] ?: 82
+                val minT = prefs[WeatherWidgetKeys.minTemp] ?: 61
+                val precip = prefs[WeatherWidgetKeys.precipitationInfo] ?: "None for 10d"
+                val feels = prefs[WeatherWidgetKeys.feelsLike] ?: 52
+
+                WeatherWidgetContent(locName, temp, icon, maxT, minT, precip, feels)
+            }
         }
     }
 
     @Composable
-    private fun WeatherWidgetContent() {
-        val white = Color.White
-        val lightWhite = white.copy(alpha = 0.7f)
-        
+    private fun WeatherWidgetContent(
+        locationName: String,
+        currentTemp: Int,
+        conditionIcon: String,
+        maxTemp: Int,
+        minTemp: Int,
+        precipitationInfo: String,
+        feelsLike: Int
+    ) {
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(ImageProvider(R.drawable.bg_ios_weather))
+                .background(GlanceTheme.colors.primaryContainer)
+                .cornerRadius(24.dp)
                 .clickable(actionStartActivity<MainActivity>())
         ) {
             Column(
@@ -44,18 +87,18 @@ class IosWeatherWidget : GlanceAppWidget() {
                     // Left: Location & Large Temp
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "My Location",
+                            text = locationName,
                             style = TextStyle(
-                                color = ColorProvider(day = white, night = white),
+                                color = GlanceTheme.colors.onPrimaryContainer,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         )
                         Spacer(modifier = GlanceModifier.height(4.dp))
                         Text(
-                            text = "61°",
+                            text = "$currentTemp°",
                             style = TextStyle(
-                                color = ColorProvider(day = white, night = white),
+                                color = GlanceTheme.colors.onPrimaryContainer,
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Normal
                             )
@@ -65,22 +108,22 @@ class IosWeatherWidget : GlanceAppWidget() {
                     // Right: Icon & High/Low
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "⛅", 
+                            text = conditionIcon, 
                             style = TextStyle(fontSize = 28.sp)
                         )
                         Spacer(modifier = GlanceModifier.height(4.dp))
                         Text(
-                            text = "↑82°",
+                            text = "↑$maxTemp°",
                             style = TextStyle(
-                                color = ColorProvider(day = white, night = white),
+                                color = GlanceTheme.colors.onPrimaryContainer,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         )
                         Text(
-                            text = "↓61°",
+                            text = "↓$minTemp°",
                             style = TextStyle(
-                                color = ColorProvider(day = lightWhite, night = lightWhite),
+                                color = GlanceTheme.colors.onPrimaryContainer,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -96,15 +139,15 @@ class IosWeatherWidget : GlanceAppWidget() {
                     Text(
                         text = "Precipitation",
                         style = TextStyle(
-                            color = ColorProvider(day = white, night = white),
+                            color = GlanceTheme.colors.onPrimaryContainer,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
                     )
                     Text(
-                        text = "None for 10d",
+                        text = precipitationInfo,
                         style = TextStyle(
-                            color = ColorProvider(day = lightWhite, night = lightWhite),
+                            color = GlanceTheme.colors.onPrimaryContainer,
                             fontSize = 12.sp
                         )
                     )
@@ -117,15 +160,15 @@ class IosWeatherWidget : GlanceAppWidget() {
                     Text(
                         text = "Feels Like",
                         style = TextStyle(
-                            color = ColorProvider(day = white, night = white),
+                            color = GlanceTheme.colors.onPrimaryContainer,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
                     )
                     Text(
-                        text = "52°",
+                        text = "$feelsLike°",
                         style = TextStyle(
-                            color = ColorProvider(day = lightWhite, night = lightWhite),
+                            color = GlanceTheme.colors.onPrimaryContainer,
                             fontSize = 12.sp
                         )
                     )
@@ -137,4 +180,28 @@ class IosWeatherWidget : GlanceAppWidget() {
 
 class IosWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = IosWeatherWidget()
+
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        
+        // Schedule periodic update
+        val periodicWork = PeriodicWorkRequestBuilder<WeatherWidgetWorker>(1, TimeUnit.HOURS).build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "weather_widget_update",
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWork
+        )
+        
+        // Trigger immediate update
+        val immediateWork = OneTimeWorkRequestBuilder<WeatherWidgetWorker>().build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "weather_widget_update_now",
+            ExistingWorkPolicy.REPLACE,
+            immediateWork
+        )
+    }
 }

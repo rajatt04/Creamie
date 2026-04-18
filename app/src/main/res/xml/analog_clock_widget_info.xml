@@ -11,4 +11,5 @@
     android:widgetCategory="home_screen"
     android:updatePeriodMillis="86400000"
     android:description="@string/analog_clock_widget_description"
+    android:previewImage="@drawable/ic_clock"
     android:previewLayout="@layout/widget_analog_clock" />

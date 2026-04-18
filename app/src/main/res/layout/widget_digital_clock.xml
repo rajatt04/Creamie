@@ -14,7 +14,7 @@
         android:text="12:00:00"
         android:textSize="48sp"
         android:textStyle="bold"
-        android:textColor="?android:colorActivatedHighlight"/>
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <TextView
         android:id="@+id/clock_date"
@@ -22,6 +22,6 @@
         android:layout_height="wrap_content"
         android:text="Monday, Nov 9"
         android:textSize="14sp"
-        android:textColor="?android:colorControlActivated"/>
+        android:textColor="?android:attr/textColorSecondary"/>
 
 </LinearLayout>

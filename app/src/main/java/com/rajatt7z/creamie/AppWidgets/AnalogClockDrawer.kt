@@ -2,6 +2,7 @@ package com.rajatt7z.creamie.AppWidgets
 
 import android.content.Context
 import android.graphics.*
+import android.content.res.Configuration
 import java.util.Calendar
 
 object AnalogClockDrawer {
@@ -12,16 +13,13 @@ object AnalogClockDrawer {
         val centerX = width / 2f
         val centerY = height / 2f
         val radius = Math.min(centerX, centerY) * 0.90f
+        val isDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val primaryColor = if (isDarkMode) Color.WHITE else Color.parseColor("#121212")
+        val secondaryColor = if (isDarkMode) Color.LTGRAY else Color.parseColor("#424242")
+        val tickColor = if (isDarkMode) Color.parseColor("#BDBDBD") else Color.DKGRAY
+        val accentColor = if (isDarkMode) Color.parseColor("#FFB74D") else Color.parseColor("#FF9800")
         
-        // Background (White rounded square)
-        // Follow Material Theme by using system colors if possible, but the image shows a white clock face.
-        // Let's use a very light color or standard white.
-        val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE 
-            style = Paint.Style.FILL
-        }
-        val rectF = RectF(0f, 0f, width.toFloat(), height.toFloat())
-        canvas.drawRoundRect(rectF, width * 0.25f, height * 0.25f, bgPaint)
+        // No background drawn here, handled by widget_background.xml layout
         
         // Ticks
         val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -43,15 +41,14 @@ object AnalogClockDrawer {
             // Skip drawing the hour ticks where the numbers 12, 3, 6, 9 are placed
             val skipTick = i == 0 || i == 15 || i == 30 || i == 45
             if (!skipTick) {
-                // The image shows grey ticks for both, but maybe slightly darker for hours
-                tickPaint.color = if (isHour) Color.DKGRAY else Color.parseColor("#BDBDBD") // LTGRAY
+                tickPaint.color = if (isHour) tickColor else Color.parseColor("#9E9E9E")
                 canvas.drawLine(startX.toFloat(), startY.toFloat(), stopX.toFloat(), stopY.toFloat(), tickPaint)
             }
         }
         
         // Numbers: 12, 3, 6, 9
         val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#424242") // Dark Gray
+            color = secondaryColor
             textSize = radius * 0.38f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
@@ -79,17 +76,17 @@ object AnalogClockDrawer {
         
         // Hands
         val hourHandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#121212") // Almost black
+            color = primaryColor
             strokeWidth = radius * 0.08f
             strokeCap = Paint.Cap.ROUND
         }
         val minHandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#121212")
+            color = primaryColor
             strokeWidth = radius * 0.06f
             strokeCap = Paint.Cap.ROUND
         }
         val secHandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FF9800") // Orange
+            color = accentColor
             strokeWidth = radius * 0.02f
             strokeCap = Paint.Cap.ROUND
         }
@@ -137,11 +134,11 @@ object AnalogClockDrawer {
         
         // Center dots
         val centerDotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FF9800")
+            color = accentColor
             style = Paint.Style.FILL
         }
         canvas.drawCircle(centerX, centerY, radius * 0.05f, centerDotPaint)
-        centerDotPaint.color = Color.WHITE
+        centerDotPaint.color = if (isDarkMode) Color.BLACK else Color.WHITE
         canvas.drawCircle(centerX, centerY, radius * 0.02f, centerDotPaint)
         
         return bitmap

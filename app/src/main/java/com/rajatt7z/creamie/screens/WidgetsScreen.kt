@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Info
@@ -59,6 +60,7 @@ fun WidgetsScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.elevatedCardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
@@ -123,7 +125,7 @@ fun WidgetsScreen(navController: NavController) {
                                         )
                                         .show()
                                 },
-                            shape = MaterialTheme.shapes.extraLarge,
+                            shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {

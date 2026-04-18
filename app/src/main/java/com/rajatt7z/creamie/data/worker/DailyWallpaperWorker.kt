@@ -51,6 +51,15 @@ class DailyWallpaperWorker @AssistedInject constructor(
             }
             inputStream.close()
 
+            // Update the widget state to store the photo ID
+            val manager = androidx.glance.appwidget.GlanceAppWidgetManager(applicationContext)
+            val glanceIds = manager.getGlanceIds(WallpaperOfTheDayWidget::class.java)
+            for (glanceId in glanceIds) {
+                androidx.glance.appwidget.state.updateAppWidgetState(applicationContext, glanceId) { prefs ->
+                    prefs[androidx.datastore.preferences.core.intPreferencesKey("photo_id")] = photo.id
+                }
+            }
+
             // Update the widget to show the new image
             WallpaperOfTheDayWidget().updateAll(applicationContext)
 
