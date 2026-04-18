@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
@@ -22,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,11 +37,15 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil.compose.AsyncImage
+import com.rajatt7z.creamie.domain.model.Photo
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerScreen(
     onBack: () -> Unit,
+    onPhotoClick: (Int) -> Unit = {},
     viewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -212,15 +220,20 @@ fun VideoPlayerScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Button(
-                            onClick = { /* Subscribe logic */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onBackground,
-                                contentColor = MaterialTheme.colorScheme.background
-                            ),
-                            shape = RoundedCornerShape(20.dp)
+                        val isFollowing = uiState.isFollowing
+                        IconButton(
+                            onClick = viewModel::toggleFollow,
+                            modifier = Modifier.size(40.dp).background(
+                                color = if (isFollowing) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onBackground,
+                                shape = CircleShape
+                            )
                         ) {
-                            Text("Subscribe")
+                            Icon(
+                                imageVector = if (isFollowing) Icons.Default.Check else Icons.Default.PersonAdd,
+                                contentDescription = if (isFollowing) "Subscribed" else "Subscribe",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isFollowing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.background
+                            )
                         }
                     }
                 }
@@ -237,9 +250,18 @@ fun VideoPlayerScreen(
                     )
                 }
 
-                // Related video skeletons/placeholders
-                items(5) {
-                    RelatedVideoItem()
+                if (uiState.isLoadingRelated) {
+                    // Show shimmer while loading
+                    items(5) {
+                        RelatedContentShimmer()
+                    }
+                } else {
+                    items(uiState.relatedPhotos) { photo ->
+                        RelatedPhotoItem(
+                            photo = photo,
+                            onClick = { onPhotoClick(photo.id) }
+                        )
+                    }
                 }
             }
         }
@@ -325,7 +347,52 @@ fun ActionButton(
 }
 
 @Composable
-fun RelatedVideoItem() {
+fun RelatedPhotoItem(
+    photo: Photo,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AsyncImage(
+            model = photo.src.medium,
+            contentDescription = photo.alt.ifEmpty { photo.photographer },
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .width(160.dp)
+                .aspectRatio(1.77f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 80.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = photo.photographer,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${photo.width} × ${photo.height}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun RelatedContentShimmer() {
     Row(
         modifier = Modifier
             .fillMaxWidth()

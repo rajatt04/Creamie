@@ -18,4 +18,8 @@ interface PhotoRepository {
     ): Flow<PagingData<Photo>>
 
     suspend fun getPhotoById(id: Int): NetworkResult<Photo>
+
+    /** Fetch a single page of curated photos (non-paged, for related content sections) */
+    suspend fun getCuratedPage(page: Int = 1, perPage: Int = 10): NetworkResult<List<Photo>>
 }
+

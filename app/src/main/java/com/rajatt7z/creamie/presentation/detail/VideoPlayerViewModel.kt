@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.data.repository.DownloadRepository
+import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.model.Video
 import com.rajatt7z.creamie.domain.model.VideoFile
+import com.rajatt7z.creamie.domain.repository.PhotoRepository
 import com.rajatt7z.creamie.domain.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
 
 data class VideoPlayerUiState(
     val video: Video? = null,
@@ -25,13 +28,18 @@ data class VideoPlayerUiState(
     val message: String? = null,
     val selectedQuality: VideoFile? = null,
     val showQualitySheet: Boolean = false,
-    val isDownloading: Boolean = false
+    val isDownloading: Boolean = false,
+    val relatedPhotos: List<Photo> = emptyList(),
+    val isLoadingRelated: Boolean = true,
+    val isFollowing: Boolean = false
 )
 
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor(
     private val videoRepository: VideoRepository,
+    private val photoRepository: PhotoRepository,
     private val downloadRepository: DownloadRepository,
+    private val followsRepository: FollowsRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -43,6 +51,7 @@ class VideoPlayerViewModel @Inject constructor(
 
     init {
         loadVideo()
+        loadRelatedPhotos()
     }
 
     private fun loadVideo() {
@@ -63,6 +72,7 @@ class VideoPlayerViewModel @Inject constructor(
                             selectedQuality = bestQuality
                         )
                     }
+                    observeFollowing(videoInfo.user.id.toLong())
                 }
                 is NetworkResult.Error -> {
                     _uiState.update {
@@ -74,6 +84,22 @@ class VideoPlayerViewModel @Inject constructor(
                 }
                 else -> {
                     _uiState.update { it.copy(isLoading = false) }
+                }
+            }
+        }
+    }
+
+    private fun loadRelatedPhotos() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingRelated = true) }
+            when (val result = photoRepository.getCuratedPage()) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(relatedPhotos = result.data, isLoadingRelated = false)
+                    }
+                }
+                else -> {
+                    _uiState.update { it.copy(isLoadingRelated = false) }
                 }
             }
         }
@@ -104,5 +130,24 @@ class VideoPlayerViewModel @Inject constructor(
 
     fun clearMessage() {
         _uiState.update { it.copy(message = null) }
+    }
+
+    private fun observeFollowing(photographerId: Long) {
+        viewModelScope.launch {
+            followsRepository.isFollowed(photographerId).collect { isFollowing ->
+                _uiState.update { it.copy(isFollowing = isFollowing) }
+            }
+        }
+    }
+
+    fun toggleFollow() {
+        val video = _uiState.value.video ?: return
+        viewModelScope.launch {
+            followsRepository.toggleFollow(
+                photographerId = video.user.id.toLong(),
+                name = video.user.name,
+                url = video.user.url
+            )
+        }
     }
 }

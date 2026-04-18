@@ -14,7 +14,8 @@ data class Photo(
     val avgColor: String?,
     val src: WallpaperSrc,
     val liked: Boolean,
-    val alt: String
+    val alt: String,
+    val isVideo: Boolean = false
 )
 
 @Immutable
@@ -81,4 +82,11 @@ data class Collection(
     val mediaCount: Int,
     val photosCount: Int,
     val videosCount: Int
+)
+
+@Immutable
+data class FollowedPhotographer(
+    val id: Long,
+    val name: String,
+    val url: String
 )

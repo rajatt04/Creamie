@@ -20,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
 
 data class DetailUiState(
     val photo: Photo? = null,
@@ -32,7 +33,8 @@ data class DetailUiState(
     val message: String? = null,
     val selectedQuality: String = "large2x",
     val colorPalette: List<Int> = emptyList(),
-    val showWallpaperDialog: Boolean = false
+    val showWallpaperDialog: Boolean = false,
+    val isFollowing: Boolean = false
 )
 
 @HiltViewModel
@@ -41,7 +43,8 @@ class DetailViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val favoritesRepository: FavoritesRepository,
     private val downloadRepository: DownloadRepository,
-    private val wallpaperSetterRepository: WallpaperSetterRepository
+    private val wallpaperSetterRepository: WallpaperSetterRepository,
+    private val followsRepository: FollowsRepository
 ) : ViewModel() {
 
     private val photoId: Int = savedStateHandle["photoId"] ?: 0
@@ -66,6 +69,7 @@ class DetailViewModel @Inject constructor(
                             error = null
                         )
                     }
+                    observeFollowing(result.data.photographerId)
                 }
                 is NetworkResult.Error -> {
                     _uiState.update {
@@ -92,6 +96,25 @@ class DetailViewModel @Inject constructor(
         val photo = _uiState.value.photo ?: return
         viewModelScope.launch {
             favoritesRepository.toggleFavorite(photo)
+        }
+    }
+
+    private fun observeFollowing(photographerId: Long) {
+        viewModelScope.launch {
+            followsRepository.isFollowed(photographerId).collect { isFollowing ->
+                _uiState.update { it.copy(isFollowing = isFollowing) }
+            }
+        }
+    }
+
+    fun toggleFollow() {
+        val photo = _uiState.value.photo ?: return
+        viewModelScope.launch {
+            followsRepository.toggleFollow(
+                photographerId = photo.photographerId,
+                name = photo.photographer,
+                url = photo.photographerUrl
+            )
         }
     }
 

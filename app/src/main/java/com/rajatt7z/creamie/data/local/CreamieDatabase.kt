@@ -12,9 +12,10 @@ import com.rajatt7z.creamie.data.local.entity.*
         FavoriteEntity::class,
         SearchHistoryEntity::class,
         DownloadHistoryEntity::class,
-        RemoteKeyEntity::class
+        RemoteKeyEntity::class,
+        FollowedEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class CreamieDatabase : RoomDatabase() {
@@ -24,4 +25,5 @@ abstract class CreamieDatabase : RoomDatabase() {
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun downloadHistoryDao(): DownloadHistoryDao
     abstract fun remoteKeyDao(): RemoteKeyDao
+    abstract fun followedDao(): FollowedDao
 }

@@ -192,7 +192,8 @@ fun CreamieNavGraph(
                 deepLinks = listOf(navDeepLink { uriPattern = "creamie://video/{videoId}" })
             ) { _ ->
                 VideoPlayerScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
                 )
             }
 
@@ -204,9 +205,10 @@ fun CreamieNavGraph(
                 ),
                 deepLinks = listOf(navDeepLink { uriPattern = "creamie://collection/{collectionId}/{collectionTitle}" })
             ) { _ ->
-                CollectionDetailsScreen(
+            CollectionDetailsScreen(
                     onBack = { navController.popBackStack() },
-                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
+                    onVideoClick = { videoId -> navController.navigate(Routes.videoPlayer(videoId)) }
                 )
             }
             

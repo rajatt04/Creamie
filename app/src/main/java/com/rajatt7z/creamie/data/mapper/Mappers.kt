@@ -139,18 +139,50 @@ fun CollectionEntity.toDomain(): Collection = Collection(
 // ========== Collection Media → Photo ==========
 
 fun CollectionMediaDto.toPhotoDomain(): Photo? {
-    if (type != "Photo" || src == null) return null
-    return Photo(
-        id = id,
-        width = width ?: 0,
-        height = height ?: 0,
-        url = url ?: "",
-        photographer = photographer ?: "Unknown",
-        photographerUrl = photographerUrl ?: "",
-        photographerId = 0L,
-        avgColor = null,
-        src = src.toDomain(),
-        liked = false,
-        alt = ""
-    )
+    return when (type) {
+        "Photo" -> {
+            if (src == null) return null
+            Photo(
+                id = id,
+                width = width ?: 0,
+                height = height ?: 0,
+                url = url ?: "",
+                photographer = photographer ?: "Unknown",
+                photographerUrl = photographerUrl ?: "",
+                photographerId = 0L,
+                avgColor = null,
+                src = src.toDomain(),
+                liked = false,
+                alt = "",
+                isVideo = false
+            )
+        }
+        "Video" -> {
+            val thumbnailUrl = image ?: return null
+            Photo(
+                id = id,
+                width = width ?: 0,
+                height = height ?: 0,
+                url = url ?: "",
+                photographer = photographer ?: "Unknown",
+                photographerUrl = photographerUrl ?: "",
+                photographerId = 0L,
+                avgColor = null,
+                src = WallpaperSrc(
+                    original = thumbnailUrl,
+                    large2x = thumbnailUrl,
+                    large = thumbnailUrl,
+                    medium = thumbnailUrl,
+                    small = thumbnailUrl,
+                    portrait = thumbnailUrl,
+                    landscape = thumbnailUrl,
+                    tiny = thumbnailUrl
+                ),
+                liked = false,
+                alt = "",
+                isVideo = true
+            )
+        }
+        else -> null
+    }
 }

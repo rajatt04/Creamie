@@ -113,6 +113,7 @@ dependencies {
 
     // Hilt DI
     implementation(libs.hilt.android)
+    implementation(libs.androidx.media3.exoplayer)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.work)

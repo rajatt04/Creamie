@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     onSearchPhotos: (String) -> Unit,
@@ -32,6 +33,9 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var currentQuery by remember { mutableStateOf("") }
+    val suggestedQueries = remember { 
+        listOf("Nature", "Minimal", "Coding", "Abstract", "Aesthetic", "Dark", "Neon", "City", "Cars", "Space", "Animals", "Architecture", "Technology", "Fashion", "Travel") 
+    }
 
     Scaffold(
         topBar = {
@@ -107,30 +111,71 @@ fun SearchScreen(
         ) {
             
             if (currentQuery.isNotEmpty()) {
-                // Action buttons to search in Photos vs Videos
-                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    Text("Search in", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Button(
-                        onClick = { 
-                            viewModel.onSearch(currentQuery)
-                            onSearchPhotos(android.net.Uri.encode(currentQuery))
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Photos for \"$currentQuery\"", style = MaterialTheme.typography.titleMedium)
-                    }
-                    
+                val matchingSuggestions = remember(currentQuery, uiState.searchHistory) {
+                    val combined = (uiState.searchHistory + suggestedQueries).distinct()
+                    combined.filter { it.contains(currentQuery, ignoreCase = true) && !it.equals(currentQuery, ignoreCase = true) }
+                }
 
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 120.dp)
+                ) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                            Text("Search for", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Button(
+                                onClick = { 
+                                    viewModel.onSearch(currentQuery)
+                                    onSearchPhotos(android.net.Uri.encode(currentQuery))
+                                },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("\"$currentQuery\"", style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+                    }
+
+                    if (matchingSuggestions.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Suggestions",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(matchingSuggestions) { suggestion ->
+                            ListItem(
+                                headlineContent = { Text(suggestion, fontWeight = FontWeight.Medium) },
+                                leadingContent = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        currentQuery = suggestion
+                                        viewModel.onSearch(suggestion)
+                                        onSearchPhotos(android.net.Uri.encode(suggestion))
+                                    },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                            )
+                        }
+                    }
                 }
             } else {
                 // History
                 SearchHistorySection(
                     history = uiState.searchHistory,
+                    suggestions = suggestedQueries,
                     onItemClick = { query -> 
                         currentQuery = query 
+                        viewModel.onSearch(query)
+                        onSearchPhotos(android.net.Uri.encode(query))
                     },
                     onDeleteItem = viewModel::onDeleteHistory,
                     onClearAll = viewModel::onClearAllHistory
@@ -140,37 +185,20 @@ fun SearchScreen(
     }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun SearchHistorySection(
     history: List<String>,
+    suggestions: List<String>,
     onItemClick: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
     onClearAll: () -> Unit
 ) {
-    if (history.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🔍", fontSize = 48.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    "What are you looking for?",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    "Try nature, minimal, coding...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp)
-        ) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
+    ) {
+        if (history.isNotEmpty()) {
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -179,25 +207,94 @@ private fun SearchHistorySection(
                 ) {
                     Text(
                         "Recent Searches",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                     )
                     TextButton(onClick = onClearAll) {
-                        Text("Clear All")
+                        Text("Clear All", fontWeight = FontWeight.Medium)
                     }
                 }
             }
             items(history) { query ->
                 ListItem(
-                    headlineContent = { Text(query) },
-                    leadingContent = { Icon(Icons.Default.History, contentDescription = null) },
+                    headlineContent = { Text(query, fontWeight = FontWeight.Medium) },
+                    leadingContent = { Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     trailingContent = {
                         IconButton(onClick = { onDeleteItem(query) }) {
-                            Icon(Icons.Default.Close, contentDescription = "Delete")
+                            Icon(Icons.Default.Close, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     },
-                    modifier = Modifier.clickable { onItemClick(query) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onItemClick(query) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
+            }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+        } else {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(88.dp)
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(44.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            "What are you looking for?",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Try searching for some ideas below",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                Text(
+                    "Suggested Searches",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    suggestions.forEach { suggestion ->
+                        Surface(
+                            onClick = { onItemClick(suggestion) },
+                            shape = RoundedCornerShape(100),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.clip(RoundedCornerShape(100))
+                        ) {
+                            Text(
+                                text = suggestion,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
     }

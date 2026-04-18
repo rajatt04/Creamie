@@ -23,6 +23,7 @@ import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 @Composable
 fun CollectionDetailsScreen(
     onPhotoClick: (Int) -> Unit,
+    onVideoClick: (Int) -> Unit = {},
     onBack: () -> Unit,
     viewModel: CollectionDetailsViewModel = hiltViewModel()
 ) {
@@ -72,9 +73,12 @@ fun CollectionDetailsScreen(
                         thumbnailUrl = photo.src.medium, // Using medium for grid thumbnails
                         aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
                         title = photo.photographer,
-                        isVideo = false, // added parameter
+                        isVideo = photo.isVideo,
                         index = index,
-                        onClick = { onPhotoClick(photo.id) }
+                        onClick = {
+                            if (photo.isVideo) onVideoClick(photo.id)
+                            else onPhotoClick(photo.id)
+                        }
                     )
                 }
             }
@@ -94,3 +98,4 @@ fun CollectionDetailsScreen(
         }
     }
 }
+

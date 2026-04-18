@@ -46,6 +46,7 @@ fun DetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    var isUiVisible by remember { mutableStateOf(true) }
 
     // Heart animation
     val heartScale by animateFloatAsState(
@@ -99,7 +100,14 @@ fun DetailScreen(
             AsyncImage(
                 model = photo.src.large2x,
                 contentDescription = photo.alt,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        isUiVisible = !isUiVisible
+                    },
                 contentScale = ContentScale.Crop,
                 onSuccess = { result ->
                     val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
@@ -108,13 +116,19 @@ fun DetailScreen(
             )
 
             // Top Action Pills
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+            AnimatedVisibility(
+                visible = isUiVisible,
+                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                 // Back Button
                 IconButton(
                     onClick = onBack,
@@ -151,17 +165,23 @@ fun DetailScreen(
                     }
                 }
             }
+        }
 
             // Bottom Glassmorphic Panel
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
-                    .navigationBarsPadding()
-                    .padding(horizontal = 32.dp, vertical = 32.dp)
+            AnimatedVisibility(
+                visible = isUiVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
+                        .navigationBarsPadding()
+                        .padding(horizontal = 32.dp, vertical = 32.dp)
+                ) {
                 // Photographer info
                 Row(
                     modifier = Modifier
@@ -203,6 +223,22 @@ fun DetailScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val isFollowing = uiState.isFollowing
+                    IconButton(
+                        onClick = { viewModel.toggleFollow() },
+                        modifier = Modifier.size(36.dp).background(
+                            color = if (isFollowing) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onBackground,
+                            shape = CircleShape
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isFollowing) Icons.Default.Check else Icons.Default.PersonAdd,
+                            contentDescription = if (isFollowing) "Following" else "Follow",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (isFollowing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.background
+                        )
                     }
                 }
 
@@ -315,6 +351,7 @@ fun DetailScreen(
                     }
                 }
             }
+        }
         }
     }
 
