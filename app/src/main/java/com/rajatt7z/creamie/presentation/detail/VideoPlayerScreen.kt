@@ -1,27 +1,60 @@
+@file:Suppress("OPT_IN_ARGUMENT_IS_NOT_MARKER")
+
 package com.rajatt7z.creamie.presentation.detail
 
-import android.net.Uri
 import android.widget.Toast
-import kotlin.OptIn
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HighQuality
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -29,7 +62,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -96,7 +131,7 @@ fun VideoPlayerScreen(
     LaunchedEffect(selectedQuality) {
         selectedQuality?.let {
             val position = exoPlayer.currentPosition
-            val mediaItem = MediaItem.fromUri(Uri.parse(it.link))
+            val mediaItem = MediaItem.fromUri(it.link.toUri())
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
             exoPlayer.seekTo(position)
@@ -126,13 +161,33 @@ fun VideoPlayerScreen(
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // 1. YouTube-style Video Player Area (Fixed Aspect Ratio)
+            // 1. Premium Video Player Area (Blurred background, reasonable aspect ratio)
+            val videoAspect = if (video.height > 0) video.width.toFloat() / video.height.toFloat() else 1.77f
+            val clampedAspect = videoAspect.coerceIn(0.8f, 1.77f) // min 4:5, max 16:9 to keep bottom controls visible
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1.77f) // 16:9
+                    .aspectRatio(clampedAspect)
                     .background(Color.Black)
             ) {
+                // Blurred background to fill black bars
+                AsyncImage(
+                    model = video.image,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(24.dp)
+                )
+                
+                // Dark overlay to make the actual video pop
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.4f))
+                )
+
                 AndroidView(
                     factory = { ctx ->
                         PlayerView(ctx).apply {
@@ -140,8 +195,12 @@ fun VideoPlayerScreen(
                             useController = true
                             setShowNextButton(false)
                             setShowPreviousButton(false)
-                            setControllerShowTimeoutMs(3000)
+                            setShowFastForwardButton(false)
+                            setShowRewindButton(false)
+                            setControllerShowTimeoutMs(2000)
                             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                            setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
+                            setBackgroundColor(android.graphics.Color.TRANSPARENT)
                         }
                     },
                     modifier = Modifier.fillMaxSize()
