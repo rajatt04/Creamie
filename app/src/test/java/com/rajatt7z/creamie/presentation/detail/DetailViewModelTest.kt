@@ -7,6 +7,7 @@ import com.rajatt7z.creamie.data.repository.WallpaperSetterRepository
 import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.model.WallpaperSrc
 import com.rajatt7z.creamie.domain.repository.FavoritesRepository
+import com.rajatt7z.creamie.domain.repository.FollowsRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ class DetailViewModelTest {
     private lateinit var favoritesRepository: FavoritesRepository
     private lateinit var downloadRepository: DownloadRepository
     private lateinit var wallpaperSetterRepository: WallpaperSetterRepository
+    private lateinit var followsRepository: FollowsRepository
     private lateinit var savedStateHandle: SavedStateHandle
 
     private val testPhoto = Photo(
@@ -62,6 +64,8 @@ class DetailViewModelTest {
         favoritesRepository = mockk()
         downloadRepository = mockk()
         wallpaperSetterRepository = mockk()
+        followsRepository = mockk()
+        coEvery { followsRepository.isFollowed(any()) } returns flowOf(false)
         savedStateHandle = SavedStateHandle(mapOf("photoId" to 123))
     }
 
@@ -77,7 +81,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -97,7 +101,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -117,7 +121,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -134,7 +138,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -149,7 +153,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -166,7 +170,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -186,7 +190,7 @@ class DetailViewModelTest {
 
         val viewModel = DetailViewModel(
             savedStateHandle, photoRepository, favoritesRepository,
-            downloadRepository, wallpaperSetterRepository
+            downloadRepository, wallpaperSetterRepository, followsRepository
         )
         testDispatcher.scheduler.advanceUntilIdle()
 
