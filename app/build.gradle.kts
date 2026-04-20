@@ -148,10 +148,6 @@ dependencies {
     // WorkManager
     implementation(libs.work.runtime.ktx)
 
-    // Glance Widget
-    implementation(libs.glance.appwidget)
-    implementation(libs.glance.material3)
-
     // Lottie
     implementation(libs.lottie.compose)
 
@@ -184,5 +180,5 @@ dependencies {
 
     // Location
     implementation(libs.play.services.location)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+    implementation(libs.kotlinx.coroutines.play.services)
 }

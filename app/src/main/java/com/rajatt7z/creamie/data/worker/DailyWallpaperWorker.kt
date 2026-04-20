@@ -11,12 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
-import androidx.glance.appwidget.updateAll
-import com.rajatt7z.creamie.presentation.widget.WallpaperOfTheDayWidget
 
 /**
  * Worker that prefetches and caches the "Daily Wallpaper"
- * for display in the widget and home screen.
+ * for display on the home screen.
  */
 @HiltWorker
 class DailyWallpaperWorker @AssistedInject constructor(
@@ -26,7 +24,6 @@ class DailyWallpaperWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
-        const val WORK_NAME = "daily_wallpaper_prefetch"
         const val CACHE_FILE_NAME = "daily_wallpaper.jpg"
     }
 
@@ -51,20 +48,8 @@ class DailyWallpaperWorker @AssistedInject constructor(
             }
             inputStream.close()
 
-            // Update the widget state to store the photo ID
-            val manager = androidx.glance.appwidget.GlanceAppWidgetManager(applicationContext)
-            val glanceIds = manager.getGlanceIds(WallpaperOfTheDayWidget::class.java)
-            for (glanceId in glanceIds) {
-                androidx.glance.appwidget.state.updateAppWidgetState(applicationContext, glanceId) { prefs ->
-                    prefs[androidx.datastore.preferences.core.intPreferencesKey("photo_id")] = photo.id
-                }
-            }
-
-            // Update the widget to show the new image
-            WallpaperOfTheDayWidget().updateAll(applicationContext)
-
             Result.success()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
     }

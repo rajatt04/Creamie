@@ -1,16 +1,22 @@
 package com.rajatt7z.creamie.screens
 
 import android.net.Uri
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -28,7 +34,6 @@ sealed class Screen(
     val label: String
 ) {
     object Dashboard : Screen("dashboard", Icons.Rounded.Home,"Home")
-    object Widgets : Screen("widget" , Icons.Rounded.Star,"Widgets")
     object Profile : Screen("profile", Icons.Rounded.Person,"Profile")
     object Settings : Screen("settings", Icons.Rounded.Settings,"Settings")
 }
@@ -50,7 +55,6 @@ fun Home() {
 
                 listOf(
                     Screen.Dashboard,
-                    Screen.Widgets,
                     Screen.Profile,
                     Screen.Settings
                 ).forEach { screen ->
@@ -82,7 +86,6 @@ fun Home() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dashboard.route) { DashboardScreen(navController) }
-            composable(Screen.Widgets.route) { WidgetsScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
             composable(Screen.Settings.route) { SettingsScreen() }
             composable("wallpaper/{imageUrl}") { backStackEntry ->

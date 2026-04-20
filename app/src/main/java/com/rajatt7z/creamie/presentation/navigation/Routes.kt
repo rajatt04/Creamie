@@ -33,7 +33,4 @@ object Routes {
 
     const val PHOTOGRAPHER_PROFILE = "profile/{photographerName}"
     fun photographerProfile(name: String) = "profile/$name"
-
-    // Existing widget screens
-    const val WIDGETS = "widget"
 }

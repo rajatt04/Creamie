@@ -22,8 +22,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VideoLibrary
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.outlined.Widgets
+
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,7 +52,7 @@ import com.rajatt7z.creamie.presentation.search.PhotoSearchScreen
 import com.rajatt7z.creamie.presentation.search.SearchScreen
 import com.rajatt7z.creamie.presentation.settings.SettingsScreen
 import com.rajatt7z.creamie.presentation.shorts.ShortsFeedScreen
-import com.rajatt7z.creamie.screens.WidgetsScreen
+
 
 data class BottomNavItem(
     val route: String,
@@ -67,8 +66,7 @@ val bottomNavItems = listOf(
     BottomNavItem(Routes.SEARCH, "Search", Icons.Filled.Search, Icons.Outlined.Search),
     BottomNavItem(Routes.SHORTS, "Shorts", Icons.Filled.PlayArrow, Icons.Outlined.PlayArrow),
     BottomNavItem(Routes.COLLECTIONS, "Collections", Icons.Filled.VideoLibrary, Icons.Outlined.VideoLibrary),
-    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
-    BottomNavItem(Routes.WIDGETS, "Widgets", Icons.Filled.Widgets, Icons.Outlined.Widgets)
+    BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
 )
 
 @Composable
@@ -226,10 +224,6 @@ fun CreamieNavGraph(
                 )
             }
 
-            // Existing widget screen
-            composable(Routes.WIDGETS) {
-                WidgetsScreen(navController)
-            }
 
             // Onboarding
             composable(Routes.ONBOARDING) {
