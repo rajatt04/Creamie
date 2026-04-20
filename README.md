@@ -10,9 +10,10 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 
 <p align="center">
   <a href="https://github.com/rajatt04/Creamie/releases/download/1.0.0/app-release.apk">
-    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3ZqZ3Zq/giphy.gif" width="200"/>
+    <img src="https://shields-2-0.vercel.app/badge/Download-Creamie%20APK-ff4d4d?style=glass&animate=pulse" />
   </a>
 </p>
+
 <p align="center">
   ⚡ Fast • 🎯 Minimal • 📱 Built with Kotlin & MVI
 </p>
