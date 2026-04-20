@@ -1,5 +1,8 @@
 package com.rajatt7z.creamie.presentation.settings
 
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -273,6 +276,42 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Support the Developer
+            SettingsSectionHeader("Support")
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+            ) {
+                val context = LocalContext.current
+                SettingsListItem(
+                    headline = "Support the Developer",
+                    supporting = "Ek Chai Toh Banti Hai Yaar ☕ (₹10)",
+                    icon = Icons.Outlined.Favorite,
+                    iconBgColor = Color(0xFFFFE0E0),
+                    iconTintColor = Color(0xFFE53935),
+                    modifier = Modifier.clickable {
+                        try {
+                            val upiUri = Uri.parse(
+                                "upi://pay?pa=9327998218@upi" +
+                                "&pn=Creamie%20Developer" +
+                                "&am=10" +
+                                "&cu=INR" +
+                                "&tn=Support%20Creamie%20Developer"
+                            )
+                            val intent = Intent(Intent.ACTION_VIEW, upiUri)
+                            context.startActivity(Intent.createChooser(intent, "Pay with"))
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "No UPI app found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

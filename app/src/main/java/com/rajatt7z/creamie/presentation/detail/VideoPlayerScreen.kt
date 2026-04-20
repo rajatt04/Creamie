@@ -2,7 +2,11 @@
 
 package com.rajatt7z.creamie.presentation.detail
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,6 +78,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.domain.model.Photo
+import com.rajatt7z.creamie.presentation.paywall.PaywallDialog
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
@@ -85,6 +90,16 @@ fun VideoPlayerScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.downloadVideo()
+        } else {
+            Toast.makeText(context, "Storage permission is required to download videos.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(uiState.message) {
         uiState.message?.let {
@@ -238,7 +253,13 @@ fun VideoPlayerScreen(
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        ActionButton(icon = Icons.Default.Download, label = "Download", onClick = viewModel::downloadVideo, isLoading = uiState.isDownloading)
+                        ActionButton(icon = Icons.Default.Download, label = "Download", onClick = {
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            } else {
+                                viewModel.downloadVideo()
+                            }
+                        }, isLoading = uiState.isDownloading)
                         ActionButton(icon = Icons.Default.HighQuality, label = "Quality", onClick = { viewModel.setShowQualitySheet(true) })
                     }
                 }
@@ -374,6 +395,18 @@ fun VideoPlayerScreen(
                 }
             }
         }
+    }
+
+    // Paywall dialog
+    if (uiState.showPaywall) {
+        val activity = context as? android.app.Activity
+        PaywallDialog(
+            onDismiss = { viewModel.dismissPaywall() },
+            onPurchase = {
+                activity?.let { viewModel.billingManager.launchPurchaseFlow(it) }
+            },
+            price = viewModel.billingManager.getFormattedPrice()
+        )
     }
 }
 

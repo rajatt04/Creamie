@@ -12,6 +12,7 @@ import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.repository.FavoritesRepository
 import com.rajatt7z.creamie.domain.repository.FollowsRepository
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
+import com.rajatt7z.creamie.data.billing.BillingManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,8 @@ data class DetailUiState(
     val colorPalette: List<Int> = emptyList(),
     val showWallpaperDialog: Boolean = false,
     val isFollowing: Boolean = false,
-    val cropHint: android.graphics.Rect? = null
+    val cropHint: android.graphics.Rect? = null,
+    val showPaywall: Boolean = false
 )
 
 @HiltViewModel
@@ -43,7 +45,9 @@ class DetailViewModel @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
     private val downloadRepository: DownloadRepository,
     private val wallpaperSetterRepository: WallpaperSetterRepository,
-    private val followsRepository: FollowsRepository
+    private val followsRepository: FollowsRepository,
+    private val settingsRepository: com.rajatt7z.creamie.domain.repository.SettingsRepository,
+    val billingManager: BillingManager
 ) : ViewModel() {
 
     private val photoId: Int = savedStateHandle["photoId"] ?: 0
@@ -54,6 +58,20 @@ class DetailViewModel @Inject constructor(
     init {
         loadPhoto()
         observeFavorite()
+        viewModelScope.launch { settingsRepository.incrementPhotoViews() }
+        observePremiumStatus()
+    }
+
+    private fun observePremiumStatus() {
+        viewModelScope.launch {
+            settingsRepository.preferences.collect { prefs ->
+                if (!prefs.isPremium && prefs.photoViewsCount >= 5 && prefs.videoViewsCount >= 5) {
+                    _uiState.update { it.copy(showPaywall = true) }
+                } else {
+                    _uiState.update { it.copy(showPaywall = false) }
+                }
+            }
+        }
     }
 
     private fun loadPhoto() {
@@ -213,5 +231,9 @@ class DetailViewModel @Inject constructor(
 
     fun clearMessage() {
         _uiState.update { it.copy(message = null) }
+    }
+
+    fun dismissPaywall() {
+        _uiState.update { it.copy(showPaywall = false) }
     }
 }

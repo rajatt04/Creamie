@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rajatt7z.creamie.core.network.NetworkResult
+import com.rajatt7z.creamie.data.billing.BillingManager
 import com.rajatt7z.creamie.data.repository.DownloadRepository
 import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.model.Video
@@ -31,7 +32,8 @@ data class VideoPlayerUiState(
     val isDownloading: Boolean = false,
     val relatedPhotos: List<Photo> = emptyList(),
     val isLoadingRelated: Boolean = true,
-    val isFollowing: Boolean = false
+    val isFollowing: Boolean = false,
+    val showPaywall: Boolean = false
 )
 
 @HiltViewModel
@@ -40,6 +42,8 @@ class VideoPlayerViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val downloadRepository: DownloadRepository,
     private val followsRepository: FollowsRepository,
+    private val settingsRepository: com.rajatt7z.creamie.domain.repository.SettingsRepository,
+    val billingManager: BillingManager,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -52,6 +56,20 @@ class VideoPlayerViewModel @Inject constructor(
     init {
         loadVideo()
         loadRelatedPhotos()
+        viewModelScope.launch { settingsRepository.incrementVideoViews() }
+        observePremiumStatus()
+    }
+
+    private fun observePremiumStatus() {
+        viewModelScope.launch {
+            settingsRepository.preferences.collect { prefs ->
+                if (!prefs.isPremium && prefs.photoViewsCount >= 5 && prefs.videoViewsCount >= 5) {
+                    _uiState.update { it.copy(showPaywall = true) }
+                } else {
+                    _uiState.update { it.copy(showPaywall = false) }
+                }
+            }
+        }
     }
 
     private fun loadVideo() {
@@ -149,5 +167,9 @@ class VideoPlayerViewModel @Inject constructor(
                 url = video.user.url
             )
         }
+    }
+
+    fun dismissPaywall() {
+        _uiState.update { it.copy(showPaywall = false) }
     }
 }

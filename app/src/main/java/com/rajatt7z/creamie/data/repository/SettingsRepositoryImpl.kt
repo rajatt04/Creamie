@@ -51,4 +51,16 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearApiUsageCounters() {
         preferencesManager.clearApiUsageCounters()
     }
+
+    override suspend fun incrementPhotoViews() {
+        preferencesManager.incrementPhotoViews()
+    }
+
+    override suspend fun incrementVideoViews() {
+        preferencesManager.incrementVideoViews()
+    }
+
+    override suspend fun setPremiumStatus(isPremium: Boolean) {
+        preferencesManager.setPremiumStatus(isPremium)
+    }
 }

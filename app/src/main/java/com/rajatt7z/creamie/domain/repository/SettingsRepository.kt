@@ -19,4 +19,10 @@ interface SettingsRepository {
     suspend fun clearCache()
 
     suspend fun clearApiUsageCounters()
+
+    suspend fun incrementPhotoViews()
+
+    suspend fun incrementVideoViews()
+
+    suspend fun setPremiumStatus(isPremium: Boolean)
 }

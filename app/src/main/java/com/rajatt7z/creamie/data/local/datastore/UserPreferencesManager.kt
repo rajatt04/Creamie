@@ -21,7 +21,10 @@ data class UserPreferences(
     val apiRateResetTimestamp: Long = 0L,
     val totalApiRequestsThisMonth: Int = 0,
     val autoChangeEnabled: Boolean = false,
-    val autoChangeIntervalHours: Int = 24 // daily default
+    val autoChangeIntervalHours: Int = 24, // daily default
+    val photoViewsCount: Int = 0,
+    val videoViewsCount: Int = 0,
+    val isPremium: Boolean = false
 )
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM }
@@ -42,6 +45,9 @@ class UserPreferencesManager @Inject constructor(
         private val API_TOTAL_MONTH = intPreferencesKey("api_total_requests_month")
         private val AUTO_CHANGE_ENABLED = booleanPreferencesKey("auto_change_enabled")
         private val AUTO_CHANGE_INTERVAL = intPreferencesKey("auto_change_interval_hours")
+        private val PHOTO_VIEWS_COUNT = intPreferencesKey("photo_views_count")
+        private val VIDEO_VIEWS_COUNT = intPreferencesKey("video_views_count")
+        private val IS_PREMIUM = booleanPreferencesKey("is_premium")
     }
 
     val preferencesFlow: Flow<UserPreferences> = dataStore.data.map { prefs ->
@@ -54,7 +60,10 @@ class UserPreferencesManager @Inject constructor(
             apiRateResetTimestamp = prefs[API_RATE_RESET_TS] ?: 0L,
             totalApiRequestsThisMonth = prefs[API_TOTAL_MONTH] ?: 0,
             autoChangeEnabled = prefs[AUTO_CHANGE_ENABLED] ?: false,
-            autoChangeIntervalHours = prefs[AUTO_CHANGE_INTERVAL] ?: 24
+            autoChangeIntervalHours = prefs[AUTO_CHANGE_INTERVAL] ?: 24,
+            photoViewsCount = prefs[PHOTO_VIEWS_COUNT] ?: 0,
+            videoViewsCount = prefs[VIDEO_VIEWS_COUNT] ?: 0,
+            isPremium = prefs[IS_PREMIUM] ?: false
         )
     }
 
@@ -96,6 +105,26 @@ class UserPreferencesManager @Inject constructor(
         dataStore.edit { prefs ->
             prefs[API_REQUESTS_USED_HOUR] = 0
             prefs[API_TOTAL_MONTH] = 0
+        }
+    }
+
+    suspend fun incrementPhotoViews() {
+        dataStore.edit { prefs ->
+            val current = prefs[PHOTO_VIEWS_COUNT] ?: 0
+            prefs[PHOTO_VIEWS_COUNT] = current + 1
+        }
+    }
+
+    suspend fun incrementVideoViews() {
+        dataStore.edit { prefs ->
+            val current = prefs[VIDEO_VIEWS_COUNT] ?: 0
+            prefs[VIDEO_VIEWS_COUNT] = current + 1
+        }
+    }
+
+    suspend fun setPremiumStatus(isPremium: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[IS_PREMIUM] = isPremium
         }
     }
 }

@@ -3,7 +3,11 @@ package com.rajatt7z.creamie.presentation.detail
 import android.app.WallpaperManager
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -81,6 +85,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.core.common.Constants
+import com.rajatt7z.creamie.presentation.paywall.PaywallDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +109,17 @@ fun DetailScreen(
         ),
         label = "heart_scale"
     )
+
+    // Storage permission launcher for Android 9 and below
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.downloadWallpaper()
+        } else {
+            Toast.makeText(context, "Storage permission is required to download wallpapers.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // Show messages
     LaunchedEffect(uiState.message) {
@@ -381,7 +397,13 @@ fun DetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Button(
-                        onClick = viewModel::downloadWallpaper,
+                        onClick = {
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            } else {
+                                viewModel.downloadWallpaper()
+                            }
+                        },
                         modifier = Modifier.weight(1f).height(64.dp),
                         shape = RoundedCornerShape(32.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -505,6 +527,18 @@ fun DetailScreen(
                 }
             }
         }
+    }
+
+    // Paywall dialog
+    if (uiState.showPaywall) {
+        val activity = context as? android.app.Activity
+        PaywallDialog(
+            onDismiss = { viewModel.dismissPaywall() },
+            onPurchase = {
+                activity?.let { viewModel.billingManager.launchPurchaseFlow(it) }
+            },
+            price = viewModel.billingManager.getFormattedPrice()
+        )
     }
 }
 
