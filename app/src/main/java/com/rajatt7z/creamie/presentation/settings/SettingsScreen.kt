@@ -350,7 +350,7 @@ fun SettingsScreen(
                         iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
                         iconTintColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://github.com/rajatt04/Creamie")
+                            uriHandler.openUri("https://github.com/rajatt04/Creamie/blob/main/PRIVACY_POLICY.md")
                         }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))

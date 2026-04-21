@@ -8,9 +8,7 @@
     <!-- Wallpaper -->
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
-    <!-- Location -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 
     <!-- Storage (legacy, for Android <= 9) -->
     <uses-permission
