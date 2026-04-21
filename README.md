@@ -9,7 +9,7 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 ## 📥 Download APK
 
 <p align="center">
-  <a href="https://github.com/rajatt04/Creamie/releases/download/1.0.0/app-release.apk">
+  <a href="https://github.com/rajatt04/Creamie/releases/download/2.0/app-release.apk">
     <img src="https://img.shields.io/badge/Download-Creamie%20APK-FF6B6B?style=for-the-badge&logo=android&logoColor=white" />
   </a>
 </p>
