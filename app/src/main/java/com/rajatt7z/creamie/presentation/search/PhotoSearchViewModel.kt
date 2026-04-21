@@ -34,21 +34,25 @@ class PhotoSearchViewModel @Inject constructor(
 
     private val _searchQuery = MutableStateFlow(navQuery)
 
-    val searchResults: Flow<PagingData<Photo>> = _searchQuery
-        .debounce(Constants.SEARCH_DEBOUNCE_MS)
-        .filter { it.isNotBlank() }
-        .distinctUntilChanged()
-        .flatMapLatest { query ->
-            val filters = _uiState.value.filters
-            photoRepository.searchPhotos(
-                query = query,
-                orientation = filters.orientation,
-                size = filters.size,
-                color = filters.color,
-                locale = filters.locale
-            )
-        }
-        .cachedIn(viewModelScope)
+    val searchResults: Flow<PagingData<Photo>> = combine(
+        _searchQuery
+            .debounce(Constants.SEARCH_DEBOUNCE_MS)
+            .filter { it.isNotBlank() }
+            .distinctUntilChanged(),
+        _uiState.map { it.filters }.distinctUntilChanged()
+    ) { query, filters ->
+        Pair(query, filters)
+    }
+    .flatMapLatest { (query, filters) ->
+        photoRepository.searchPhotos(
+            query = query,
+            orientation = filters.orientation,
+            size = filters.size,
+            color = filters.color,
+            locale = filters.locale
+        )
+    }
+    .cachedIn(viewModelScope)
 
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(query = query) }
@@ -57,11 +61,6 @@ class PhotoSearchViewModel @Inject constructor(
 
     fun updateFilters(filters: SearchFilters) {
         _uiState.update { it.copy(filters = filters) }
-        val currentQuery = _uiState.value.query
-        if (currentQuery.isNotBlank()) {
-            _searchQuery.value = ""
-            _searchQuery.value = currentQuery
-        }
     }
 
     fun toggleFilterSheet() {
