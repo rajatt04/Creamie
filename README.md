@@ -6,6 +6,19 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 
 ---
 
+## 📥 Download APK
+
+<p align="center">
+  <a href="https://github.com/rajatt04/Creamie/releases/download/1.0.0/app-release.apk">
+    <img src="https://img.shields.io/badge/Download-Creamie%20APK-FF6B6B?style=for-the-badge&logo=android&logoColor=white" />
+  </a>
+</p>
+<p align="center">
+  ⚡ Fast • 🎯 Minimal • 📱 Built with Kotlin & MVI
+</p>
+
+---
+
 ## 🚀 Features
 
 - **Built entirely with Jetpack Compose** (no legacy XML)
@@ -22,13 +35,17 @@ Creamie highlights the best practices of **Kotlin + Jetpack Compose + Material3*
 
 ## 📱 App Screenshots
 
-| Home & Discover | Search & Explore | Detail View |
-|:---:|:---:|:---:|
-| ![Home](https://github.com/rajatt04/Creamie/blob/master/app/src/1.jpeg?raw=true) | ![Search](https://github.com/rajatt04/Creamie/blob/master/app/src/2.jpeg?raw=true) | ![Detail](https://github.com/rajatt04/Creamie/blob/master/app/src/3.jpeg?raw=true) |
+## App Screenshots
 
-| Settings & More | Profile | Library & Collections |
-|:---:|:---:|:---:|
-| ![Settings](https://github.com/rajatt04/Creamie/blob/master/app/src/4.jpeg?raw=true) | ![Profile](https://github.com/rajatt04/Creamie/blob/master/app/src/5.jpeg?raw=true) | ![Library](https://github.com/rajatt04/Creamie/blob/master/app/src/6.jpeg?raw=true) |
+Below are some screenshots of the Creamie application showcasing its features and user interface:
+
+| Screenshot 1      | Screenshot 2      | Screenshot 3      |Screenshot 4       |
+|-------------------|-------------------|-------------------|-------------------|
+| ![Image1](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_2026_0417_195415.jpg?raw=true) | ![Image2](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195433.jpg?raw=true) | ![Image3](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195438.jpg?raw=true) |![Image4](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195454.jpg?raw=true) |
+
+| Screenshot 5      | Screenshot 6      | Screenshot 7      |Screenshot 8       |
+|-------------------|-------------------|-------------------|-------------------|
+| ![Image5](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195425.jpg?raw=true) | ![Image6](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195451.jpg?raw=true) | ![Image7](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195532.jpg?raw=true) |![Image8](https://github.com/rajatt04/Student-Management-System/blob/sms-main/Projects/Creamie/Screenshot_20260417_195504.jpg?raw=true) |
 
 ---
 
