@@ -108,6 +108,7 @@ fun OnboardingScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

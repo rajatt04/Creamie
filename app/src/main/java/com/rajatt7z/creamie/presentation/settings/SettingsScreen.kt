@@ -1,7 +1,5 @@
 package com.rajatt7z.creamie.presentation.settings
 
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PrivacyTip
@@ -58,11 +55,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rajatt7z.creamie.core.common.Constants
 import com.rajatt7z.creamie.data.local.datastore.ThemeMode
@@ -318,39 +313,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Support the Developer
-            SettingsSectionHeader("Support")
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
-            ) {
-                val context = LocalContext.current
-                SettingsListItem(
-                    headline = "Support the Developer",
-                    supporting = "Ek Chai Toh Banti Hai Yaar ☕ (₹10)",
-                    icon = Icons.Outlined.Favorite,
-                    iconBgColor = Color(0xFFFFE0E0),
-                    iconTintColor = Color(0xFFE53935),
-                    modifier = Modifier.clickable {
-                        try {
-                            val upiUri = ("upi://pay?pa=9327998218@barodampay" +
-                                    "&pn=Creamie" +
-                                    "&am=10" +
-                                    "&cu=INR" +
-                                    "&tn=Support").toUri()
-                            val intent = Intent(Intent.ACTION_VIEW, upiUri)
-                            context.startActivity(Intent.createChooser(intent, "Pay with"))
-                        } catch (_: Exception) {
-                            Toast.makeText(context, "No UPI app found", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
 
             // About
             SettingsSectionHeader("About")
