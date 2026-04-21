@@ -69,6 +69,7 @@ val bottomNavItems = listOf(
     BottomNavItem(Routes.LIBRARY, "Library", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
 )
 
+@android.annotation.SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CreamieNavGraph(
     navController: NavHostController = rememberNavController(),
