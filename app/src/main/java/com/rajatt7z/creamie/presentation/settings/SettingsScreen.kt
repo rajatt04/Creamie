@@ -327,7 +327,7 @@ fun SettingsScreen(
                 Column {
                     SettingsListItem(
                         headline = "App Version",
-                        supporting = "1.0.0",
+                        supporting = "2.0",
                         icon = Icons.Outlined.Info,
                         iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                         iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -350,7 +350,7 @@ fun SettingsScreen(
                         iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
                         iconTintColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://github.com/rajatt04/Creamie/blob/main/PRIVACY_POLICY.md")
+                            uriHandler.openUri("https://github.com/rajatt04/Creamie/blob/ryzenn_1.0/PRIVACY_POLICY.md")
                         }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -361,7 +361,7 @@ fun SettingsScreen(
                         iconBgColor = MaterialTheme.colorScheme.surfaceVariant,
                         iconTintColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://github.com/rajatt04/Creamie?tab=readme-ov-file#-license")
+                            uriHandler.openUri("https://github.com/rajatt04/Creamie/blob/ryzenn_1.0/LICENSE")
                         }
                     )
                 }
