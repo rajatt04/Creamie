@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import com.rajatt7z.creamie.domain.model.SearchFilters
 
 data class PhotoSearchUiState(
     val query: String = "",

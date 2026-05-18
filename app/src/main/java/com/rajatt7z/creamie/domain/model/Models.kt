@@ -45,7 +45,7 @@ data class WallpaperSrc(
 
 @Immutable
 data class Photographer(
-    val id: Int,
+    val id: Long,
     val name: String,
     val url: String
 )

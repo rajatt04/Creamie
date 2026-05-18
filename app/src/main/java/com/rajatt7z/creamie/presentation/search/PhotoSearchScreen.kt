@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.rajatt7z.creamie.domain.model.SearchFilters
 import com.rajatt7z.creamie.core.common.Constants
 import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard

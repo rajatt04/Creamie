@@ -15,13 +15,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.rajatt7z.creamie.domain.model.SearchFilters
 
-data class SearchFilters(
-    val orientation: String? = null,
-    val size: String? = null,
-    val color: String? = null,
-    val locale: String? = null
-)
 
 data class SearchUiState(
     val query: String = "",

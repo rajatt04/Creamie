@@ -5,16 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,7 +46,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.rajatt7z.creamie.domain.model.Collection
 import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
-import com.rajatt7z.creamie.presentation.components.ShimmerCollectionCard
 import com.rajatt7z.creamie.presentation.components.ShimmerPhotoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +55,7 @@ fun HomeScreen(
     onVideoClick: (Int) -> Unit,
     onSettingsClick: () -> Unit,
     onCollectionClick: (String, String) -> Unit,
+    onSeeAllCuratedClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val curatedPhotos = viewModel.curatedPhotos.collectAsLazyPagingItems()
@@ -116,7 +118,11 @@ fun HomeScreen(
             
             // 1. Curator's Picks (Photos)
             item {
-                SectionHeader(title = "Curator's Picks", subtitle = "Handpicked for you")
+                SectionHeader(
+                    title = "Curator's Picks", 
+                    subtitle = "Handpicked for you",
+                    onSeeAllClick = onSeeAllCuratedClick
+                )
                 Spacer(modifier = Modifier.height(12.dp))
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
@@ -207,54 +213,35 @@ fun HomeScreen(
                 }
             }
 
-            // 3. Featured Collections
-            if (!uiState.isCollectionsLoading && uiState.featuredCollections.isNotEmpty()) {
-                item {
-                    SectionHeader(title = "Featured Collections", subtitle = "Curated groups")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(uiState.featuredCollections) { collection ->
-                            CollectionCard(
-                                collection = collection,
-                                onClick = { onCollectionClick(collection.id, collection.title) }
-                            )
-                        }
-                    }
-                }
-            } else if (uiState.isCollectionsLoading) {
-                item {
-                    SectionHeader(title = "Featured Collections", subtitle = "Curated groups")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(5) {
-                            ShimmerCollectionCard()
-                        }
-                    }
-                }
-            }
+
         }
     }
 }
 
 @Composable
-fun SectionHeader(title: String, subtitle: String) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+fun SectionHeader(title: String, subtitle: String, onSeeAllClick: (() -> Unit)? = null) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (onSeeAllClick != null) {
+            TextButton(onClick = onSeeAllClick) {
+                Text("See All")
+            }
+        }
     }
 }
 

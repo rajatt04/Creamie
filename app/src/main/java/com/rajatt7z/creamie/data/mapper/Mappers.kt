@@ -87,7 +87,7 @@ fun VideoDto.toDomain(): Video = Video(
     image = image ?: "",
     duration = duration ?: 0,
     user = Photographer(
-        id = user?.id ?: 0,
+        id = user?.id ?: 0L,
         name = user?.name ?: "Unknown",
         url = user?.url ?: ""
     ),
@@ -139,8 +139,8 @@ fun CollectionEntity.toDomain(): Collection = Collection(
 // ========== Collection Media → Photo ==========
 
 fun CollectionMediaDto.toPhotoDomain(): Photo? {
-    return when (type) {
-        "Photo" -> {
+    return when (type.lowercase()) {
+        "photo" -> {
             if (src == null) return null
             Photo(
                 id = id,
@@ -157,11 +157,11 @@ fun CollectionMediaDto.toPhotoDomain(): Photo? {
                 isVideo = false
             )
         }
-        "Video" -> {
+        "video" -> {
             val thumbnailUrl = image ?: return null
             val videoPhotographer = user?.name ?: photographer ?: "Unknown"
             val videoPhotographerUrl = user?.url ?: photographerUrl ?: ""
-            val videoPhotographerId = user?.id?.toLong() ?: 0L
+            val videoPhotographerId = user?.id ?: 0L
 
             Photo(
                 id = id,

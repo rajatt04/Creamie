@@ -238,7 +238,7 @@ fun VideoPlayerScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "1.2M views • 2 days ago", // Placeholders
+                            text = "Duration: ${video.duration}s • ${video.width}x${video.height}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -295,7 +295,7 @@ fun VideoPlayerScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "850K subscribers", // Placeholder
+                                "Pexels Contributor",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

@@ -22,9 +22,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VideoLibrary
-
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -125,7 +123,8 @@ fun CreamieNavGraph(
                     onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
                     onVideoClick = { videoId -> navController.navigate(Routes.videoPlayer(videoId)) },
                     onSettingsClick = { navController.navigate(Routes.SETTINGS) },
-                    onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) }
+                    onCollectionClick = { id, title -> navController.navigate(Routes.collectionDetail(id, title)) },
+                    onSeeAllCuratedClick = { navController.navigate(Routes.CURATED_PHOTOS) }
                 )
             }
 
@@ -147,7 +146,8 @@ fun CreamieNavGraph(
 
             composable(Routes.LIBRARY) {
                 LibraryScreen(
-                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) }
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
+                    onPhotographerClick = { name -> navController.navigate(Routes.photographerProfile(name)) }
                 )
             }
 
@@ -156,8 +156,10 @@ fun CreamieNavGraph(
             }
             
             composable(Routes.CURATED_PHOTOS) {
-                // Placeholder for Curated Photos grid
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Curated Photos (Placeholder)") }
+                com.rajatt7z.creamie.presentation.home.CuratedPhotosScreen(
+                    onPhotoClick = { photoId -> navController.navigate(Routes.photoDetail(photoId)) },
+                    onBack = { navController.popBackStack() }
+                )
             }
             
             composable(
