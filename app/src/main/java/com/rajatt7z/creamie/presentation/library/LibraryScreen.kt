@@ -71,7 +71,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rajatt7z.creamie.data.local.entity.DownloadHistoryEntity
 import com.rajatt7z.creamie.domain.model.FollowedPhotographer
 import com.rajatt7z.creamie.domain.model.Photo
-import com.rajatt7z.creamie.presentation.components.AnimatedPhotoCard
+import com.rajatt7z.creamie.presentation.components.AnimatedMediaCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,6 +80,7 @@ import java.util.Locale
 @Composable
 fun LibraryScreen(
     onPhotoClick: (Int) -> Unit,
+    onVideoClick: (Int) -> Unit,
     onPhotographerClick: (String) -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
@@ -122,6 +123,7 @@ fun LibraryScreen(
                 0 -> FavoritesTab(
                     favorites = uiState.favorites,
                     onPhotoClick = onPhotoClick,
+                    onVideoClick = onVideoClick,
                     onClear = viewModel::clearFavorites
                 )
                 1 -> DownloadsTab(
@@ -224,6 +226,7 @@ private fun PillTab(
 private fun FavoritesTab(
     favorites: List<Photo>,
     onPhotoClick: (Int) -> Unit,
+    onVideoClick: (Int) -> Unit,
     onClear: () -> Unit
 ) {
     if (favorites.isEmpty()) {
@@ -268,7 +271,17 @@ private fun FavoritesTab(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 itemsIndexed(favorites, key = { _, photo -> photo.id }) { index, photo ->
-                    AnimatedPhotoCard(photo = photo, index = index, onClick = { onPhotoClick(photo.id) })
+                    AnimatedMediaCard(
+                        thumbnailUrl = photo.src.medium,
+                        aspectRatio = if (photo.height > 0) photo.width.toFloat() / photo.height.toFloat() else 1f,
+                        title = photo.photographer,
+                        isVideo = photo.isVideo,
+                        index = index,
+                        onClick = {
+                            if (photo.isVideo) onVideoClick(photo.id)
+                            else onPhotoClick(photo.id)
+                        }
+                    )
                 }
             }
         }

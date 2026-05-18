@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +79,7 @@ fun ShortsFeedScreen(
 ) {
     val items = viewModel.popularVideos.collectAsLazyPagingItems()
     val context = LocalContext.current
+    val likedState by viewModel.likedState.collectAsState()
 
     // Single ExoPlayer instance shared across the pager to save resources
     val exoPlayer = remember {
@@ -152,6 +154,7 @@ fun ShortsFeedScreen(
         exoPlayer.playWhenReady = true
         val video = items[pagerState.currentPage]
         video?.let {
+            viewModel.checkIsLiked(it.id)
             // Pick a good HD/SD quality file to play
             val videoUrl = it.videoFiles.firstOrNull { file -> file.quality == "hd" }?.link
                 ?: it.videoFiles.firstOrNull()?.link
@@ -188,6 +191,7 @@ fun ShortsFeedScreen(
                             },
                             onDoubleTap = {
                                 doubleTapLiked = true
+                                video?.let { viewModel.toggleLike(it) }
                                 scope.launch {
                                     delay(1000)
                                     doubleTapLiked = false
@@ -281,7 +285,8 @@ fun ShortsFeedScreen(
                     video = video,
                     progress = if (page == pagerState.currentPage) videoProgress else 0f,
                     durationSeconds = video.duration,
-                    isDoubleTapLiked = if (page == pagerState.currentPage) doubleTapLiked else false,
+                    isLiked = likedState[video.id] ?: false,
+                    onToggleLike = { viewModel.toggleLike(video) },
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
             }
@@ -294,17 +299,11 @@ private fun ShortsOverlay(
     video: Video,
     progress: Float,
     durationSeconds: Int,
-    isDoubleTapLiked: Boolean,
+    isLiked: Boolean,
+    onToggleLike: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isLiked by remember { mutableStateOf(false) }
-    
-    // Sync with double tap
-    LaunchedEffect(isDoubleTapLiked) {
-        if (isDoubleTapLiked) {
-            isLiked = true
-        }
-    }
+
 
     Box(
         modifier = modifier
@@ -365,7 +364,7 @@ private fun ShortsOverlay(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            IconButton(onClick = { isLiked = !isLiked }) {
+                            IconButton(onClick = onToggleLike) {
                                 Icon(
                                     imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                     contentDescription = "Like",

@@ -78,7 +78,6 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.domain.model.Photo
-import com.rajatt7z.creamie.presentation.paywall.PaywallDialog
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
@@ -395,18 +394,6 @@ fun VideoPlayerScreen(
                 }
             }
         }
-    }
-
-    // Paywall dialog
-    if (uiState.showPaywall) {
-        val activity = context as? android.app.Activity
-        PaywallDialog(
-            onDismiss = { viewModel.dismissPaywall() },
-            onPurchase = {
-                activity?.let { viewModel.billingManager.launchPurchaseFlow(it) }
-            },
-            price = viewModel.billingManager.getFormattedPrice()
-        )
     }
 }
 

@@ -53,6 +53,7 @@ data class FavoriteEntity(
     val srcSmall: String = "",
     val srcTiny: String = "",
     val alt: String = "",
+    val isVideo: Boolean = false,
     val addedAt: Long = System.currentTimeMillis()
 )
 

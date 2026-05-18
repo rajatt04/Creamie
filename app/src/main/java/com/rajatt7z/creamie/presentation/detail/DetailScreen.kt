@@ -85,7 +85,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.rajatt7z.creamie.core.common.Constants
-import com.rajatt7z.creamie.presentation.paywall.PaywallDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -529,17 +528,6 @@ fun DetailScreen(
         }
     }
 
-    // Paywall dialog
-    if (uiState.showPaywall) {
-        val activity = context as? android.app.Activity
-        PaywallDialog(
-            onDismiss = { viewModel.dismissPaywall() },
-            onPurchase = {
-                activity?.let { viewModel.billingManager.launchPurchaseFlow(it) }
-            },
-            price = viewModel.billingManager.getFormattedPrice()
-        )
-    }
 }
 
 @Composable

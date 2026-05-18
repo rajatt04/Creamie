@@ -15,7 +15,7 @@ import com.rajatt7z.creamie.data.local.entity.*
         RemoteKeyEntity::class,
         FollowedEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class CreamieDatabase : RoomDatabase() {

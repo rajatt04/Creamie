@@ -62,7 +62,8 @@ class FavoritesRepositoryImpl @Inject constructor(
             tiny = srcTiny
         ),
         liked = true,
-        alt = alt
+        alt = alt,
+        isVideo = isVideo
     )
 
     private fun Photo.toEntity(): FavoriteEntity = FavoriteEntity(
@@ -77,6 +78,7 @@ class FavoritesRepositoryImpl @Inject constructor(
         srcMedium = src.medium,
         srcSmall = src.small,
         srcTiny = src.tiny,
-        alt = alt
+        alt = alt,
+        isVideo = isVideo
     )
 }
