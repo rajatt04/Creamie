@@ -34,10 +34,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.clearCache() }
     }
 
-    fun clearApiUsage() {
-        viewModelScope.launch { settingsRepository.clearApiUsageCounters() }
-    }
-
     fun setAutoChange(enabled: Boolean, intervalHours: Int? = null) {
         viewModelScope.launch { settingsRepository.setAutoChange(enabled, intervalHours) }
     }

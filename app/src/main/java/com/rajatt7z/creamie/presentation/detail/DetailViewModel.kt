@@ -155,9 +155,7 @@ class DetailViewModel @Inject constructor(
         _uiState.update { it.copy(showWallpaperDialog = false) }
     }
 
-    fun setCropHint(rect: android.graphics.Rect?) {
-        _uiState.update { it.copy(cropHint = rect) }
-    }
+
 
     fun setWallpaper(flag: Int) {
         val photo = _uiState.value.photo ?: return

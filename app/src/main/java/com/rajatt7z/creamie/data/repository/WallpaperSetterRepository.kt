@@ -2,7 +2,6 @@ package com.rajatt7z.creamie.data.repository
 
 import android.app.WallpaperManager
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -41,25 +40,5 @@ class WallpaperSetterRepository @Inject constructor(
         }
     }
 
-    /**
-     * Sets wallpaper from an already-decoded Bitmap.
-     */
-    suspend fun setWallpaperFromBitmap(
-        bitmap: Bitmap,
-        flag: Int
-    ): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val wallpaperManager = WallpaperManager.getInstance(context)
-            wallpaperManager.setBitmap(bitmap, null, true, flag)
 
-            val target = when (flag) {
-                WallpaperManager.FLAG_SYSTEM -> "home screen"
-                WallpaperManager.FLAG_LOCK -> "lock screen"
-                else -> "both screens"
-            }
-            Result.success("Wallpaper set for $target!")
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }

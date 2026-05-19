@@ -13,12 +13,10 @@ interface DownloadHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDownload(download: DownloadHistoryEntity)
 
-    @Query("DELETE FROM download_history WHERE id = :id")
-    suspend fun deleteDownload(id: Long)
+
 
     @Query("DELETE FROM download_history")
     suspend fun clearAll()
 
-    @Query("SELECT COUNT(*) FROM download_history")
-    fun getDownloadCount(): Flow<Int>
+
 }

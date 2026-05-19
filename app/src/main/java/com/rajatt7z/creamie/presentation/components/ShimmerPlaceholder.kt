@@ -1,9 +1,17 @@
 package com.rajatt7z.creamie.presentation.components
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -66,44 +74,3 @@ fun ShimmerPhotoCard(
     }
 }
 
-@Composable
-fun ShimmerCollectionCard(
-    modifier: Modifier = Modifier
-) {
-    ShimmerPlaceholder(
-        modifier = modifier
-            .width(160.dp)
-            .height(120.dp)
-            .clip(RoundedCornerShape(16.dp))
-    )
-}
-
-@Composable
-fun HomeSectionSkeleton(
-    itemWidth: androidx.compose.ui.unit.Dp,
-    itemHeight: androidx.compose.ui.unit.Dp,
-    modifier: Modifier = Modifier
-) {
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        userScrollEnabled = false
-    ) {
-        items(5) {
-            Column(modifier = Modifier.width(itemWidth)) {
-                ShimmerPlaceholder(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(itemHeight)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ShimmerPlaceholder(
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .height(14.dp)
-                )
-            }
-        }
-    }
-}

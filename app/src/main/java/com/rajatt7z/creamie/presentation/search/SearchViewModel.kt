@@ -76,9 +76,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun onHistoryItemClick(query: String) {
-        onSearch(query)
-    }
+
 
     fun onDeleteHistory(query: String) {
         viewModelScope.launch {
