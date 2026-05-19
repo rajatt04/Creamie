@@ -1,26 +1,32 @@
 package com.rajatt7z.creamie.data.repository
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import com.rajatt7z.creamie.core.common.Constants
 import com.rajatt7z.creamie.core.network.NetworkResult
 import com.rajatt7z.creamie.core.network.safeApiCall
+import com.rajatt7z.creamie.data.local.CreamieDatabase
+import com.rajatt7z.creamie.data.local.mediator.CuratedRemoteMediator
 import com.rajatt7z.creamie.data.mapper.toDomain
-import com.rajatt7z.creamie.data.paging.CuratedPagingSource
 import com.rajatt7z.creamie.data.paging.SearchPagingSource
 import com.rajatt7z.creamie.data.remote.PexelsApiService
 import com.rajatt7z.creamie.domain.model.Photo
 import com.rajatt7z.creamie.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PhotoRepositoryImpl @Inject constructor(
-    private val apiService: PexelsApiService
+    private val apiService: PexelsApiService,
+    private val db: CreamieDatabase
 ) : PhotoRepository {
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun getCuratedPhotos(): Flow<PagingData<Photo>> {
         return Pager(
             config = PagingConfig(
@@ -29,8 +35,11 @@ class PhotoRepositoryImpl @Inject constructor(
                 prefetchDistance = 5,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { CuratedPagingSource(apiService) }
-        ).flow
+            remoteMediator = CuratedRemoteMediator(apiService, db),
+            pagingSourceFactory = { db.wallpaperDao().getCuratedWallpapers() }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
+        }
     }
 
     override fun searchPhotos(

@@ -104,6 +104,36 @@ fun VideoFileDto.toDomain(): VideoFile = VideoFile(
     link = link
 )
 
+fun VideoDto.toEntity(): VideoEntity = VideoEntity(
+    id = id,
+    width = width ?: 0,
+    height = height ?: 0,
+    url = url ?: "",
+    image = image ?: "",
+    duration = duration ?: 0,
+    userName = user?.name ?: "Unknown",
+    userId = user?.id ?: 0L,
+    userUrl = user?.url ?: "",
+    videoFiles = videoFiles?.map { it.toDomain() } ?: emptyList(),
+    thumbnails = videoPictures?.map { it.picture } ?: emptyList()
+)
+
+fun VideoEntity.toDomain(): Video = Video(
+    id = id,
+    width = width,
+    height = height,
+    url = url,
+    image = image,
+    duration = duration,
+    user = Photographer(
+        id = userId,
+        name = userName,
+        url = userUrl
+    ),
+    videoFiles = videoFiles,
+    thumbnails = thumbnails
+)
+
 // ========== Collection Mappers ==========
 
 fun CollectionDto.toDomain(): Collection = Collection(

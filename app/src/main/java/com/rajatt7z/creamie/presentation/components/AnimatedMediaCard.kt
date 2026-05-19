@@ -1,22 +1,38 @@
 package com.rajatt7z.creamie.presentation.components
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -57,8 +73,8 @@ fun AnimatedMediaCard(
     val animatedScale by animateFloatAsState(
         targetValue = if (visible) 1f else 0.8f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioHighBouncy,
-            stiffness = Spring.StiffnessLow
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
         ),
         label = "media_scale"
     )
@@ -66,8 +82,8 @@ fun AnimatedMediaCard(
     val animatedAlpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(
-            durationMillis = 400,
-            delayMillis = (index % 10) * 80
+            durationMillis = 250,
+            delayMillis = (index % 10) * 30
         ),
         label = "media_alpha"
     )
@@ -112,9 +128,9 @@ fun AnimatedMediaCard(
         AnimatedVisibility(
             visible = visible,
             enter = slideInVertically(
-                initialOffsetY = { it },
-                animationSpec = tween(500, delayMillis = 200 + (index % 10) * 80)
-            ) + fadeIn(tween(500, delayMillis = 200 + (index % 10) * 80)),
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(300, delayMillis = 100 + (index % 10) * 30)
+            ) + fadeIn(tween(300, delayMillis = 100 + (index % 10) * 30)),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(12.dp)

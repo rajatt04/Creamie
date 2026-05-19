@@ -1,6 +1,10 @@
 package com.rajatt7z.creamie
 
+import android.content.Context
+import android.hardware.display.DisplayManager
+import android.os.Build
 import android.os.Bundle
+import android.view.Display
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setPreferredRefreshRate()
         enableEdgeToEdge()
         setContent {
             val preferences by preferencesManager.preferencesFlow.collectAsState(
@@ -58,6 +63,18 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
+
+    private fun setPreferredRefreshRate() {
+        val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        val display = displayManager.getDisplay(Display.DEFAULT_DISPLAY)
+        val modes = display.supportedModes
+        val maxMode = modes.maxByOrNull { it.refreshRate }
+        if (maxMode != null) {
+            val layoutParams = window.attributes
+            layoutParams.preferredDisplayModeId = maxMode.modeId
+            window.attributes = layoutParams
         }
     }
 }

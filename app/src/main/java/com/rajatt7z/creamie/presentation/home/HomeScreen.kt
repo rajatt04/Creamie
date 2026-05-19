@@ -14,23 +14,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,14 +63,17 @@ fun HomeScreen(
     val popularVideos = viewModel.popularVideos.collectAsLazyPagingItems()
     val uiState by viewModel.uiState.collectAsState()
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
-                    Column(modifier = Modifier.padding(bottom = 0.dp)) {
+                    Column {
                         Text(
                             "DISCOVER",
-                            style = MaterialTheme.typography.labelSmall.copy(
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 letterSpacing = 3.sp,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
@@ -77,158 +81,186 @@ fun HomeScreen(
                         )
                         Text(
                             "CREAMIE",
-                            style = MaterialTheme.typography.displayMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
                             )
                         )
                     }
                 },
                 actions = {
-                    FilledIconButton(
+                    IconButton(
                         onClick = onSettingsClick,
-                        shape = CircleShape, // 👈 forces circular shape
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        modifier = Modifier
-                            .size(52.dp)
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
                             Icons.Default.Settings,
                             contentDescription = "Settings",
-                            modifier = Modifier.size(28.dp) // control icon size directly
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ),
+                scrollBehavior = scrollBehavior
             )
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 12)
     ) { padding ->
-        LazyColumn(
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 top = padding.calculateTopPadding() + 8.dp,
-                bottom = 120.dp
+                bottom = 120.dp,
+                start = 16.dp,
+                end = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalItemSpacing = 16.dp
         ) {
             
-            // 1. Curator's Picks (Photos)
-            item {
+            // 1. Trending Motion (Videos) - Full Span
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Column {
+                    SectionHeader(
+                        title = "Trending Motion", 
+                        subtitle = "Popular videos today",
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(
+                            count = popularVideos.itemCount,
+                            key = { index -> 
+                                val id = popularVideos.peek(index)?.id
+                                if (id != null) "video_${id}" else "video_placeholder_$index"
+                            },
+                            contentType = { "video" }
+                        ) { index ->
+                            popularVideos[index]?.let { video ->
+                                val durationStr = if (video.duration >= 60) {
+                                    "${video.duration / 60}:${(video.duration % 60).toString().padStart(2, '0')}"
+                                } else {
+                                    "0:${video.duration.toString().padStart(2, '0')}"
+                                }
+                                
+                                AnimatedMediaCard(
+                                    thumbnailUrl = video.image,
+                                    aspectRatio = 0.7f, // Taller for that "Reel/Story" aesthetic
+                                    title = video.user.name,
+                                    isVideo = true,
+                                    durationText = durationStr,
+                                    index = index,
+                                    onClick = { onVideoClick(video.id) },
+                                    modifier = Modifier.width(160.dp)
+                                )
+                            }
+                        }
+                        if (popularVideos.loadState.refresh is LoadState.Loading) {
+                            items(5) {
+                                AnimatedMediaCard(
+                                    thumbnailUrl = "",
+                                    aspectRatio = 0.7f,
+                                    title = "",
+                                    isVideo = true,
+                                    index = it,
+                                    onClick = {},
+                                    modifier = Modifier.width(160.dp),
+                                    isPlaceholder = true
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+            }
+
+            // 2. Curator's Picks (Photos) - Header Full Span
+            item(span = StaggeredGridItemSpan.FullLine) {
                 SectionHeader(
                     title = "Curator's Picks", 
                     subtitle = "Handpicked for you",
-                    onSeeAllClick = onSeeAllCuratedClick
+                    onSeeAllClick = onSeeAllCuratedClick,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(curatedPhotos.itemCount) { index ->
-                        curatedPhotos[index]?.let { photo ->
-                            AnimatedMediaCard(
-                                thumbnailUrl = photo.src.medium,
-                                aspectRatio = 0.8f,
-                                title = photo.photographer,
-                                isVideo = false,
-                                index = index,
-                                onClick = { onPhotoClick(photo.id) },
-                                modifier = Modifier.width(200.dp)
-                            )
-                        }
+            }
+
+            // 3. Curator's Picks (Photos) - Staggered Grid Items
+            items(
+                count = curatedPhotos.itemCount,
+                key = { index -> 
+                    val id = curatedPhotos.peek(index)?.id
+                    if (id != null) "photo_${id}" else "photo_placeholder_$index"
+                },
+                contentType = { "photo" }
+            ) { index ->
+                curatedPhotos[index]?.let { photo ->
+                    val aspectRatio = if (photo.width > 0 && photo.height > 0) {
+                        photo.width.toFloat() / photo.height.toFloat()
+                    } else {
+                        0.8f
                     }
-                    if (curatedPhotos.loadState.refresh is LoadState.Loading) {
-                        items(5) {
-                            AnimatedMediaCard(
-                                thumbnailUrl = "",
-                                aspectRatio = 0.8f,
-                                title = "",
-                                isVideo = false,
-                                index = it,
-                                onClick = {},
-                                modifier = Modifier.width(200.dp),
-                                isPlaceholder = true
-                            )
-                        }
-                    }
-                    if (curatedPhotos.loadState.append is LoadState.Loading) {
-                        item {
-                            ShimmerPhotoCard(modifier = Modifier.width(200.dp))
-                        }
-                    }
+                    AnimatedMediaCard(
+                        thumbnailUrl = photo.src.medium,
+                        aspectRatio = aspectRatio,
+                        title = photo.photographer,
+                        isVideo = false,
+                        index = index,
+                        onClick = { onPhotoClick(photo.id) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
-            // 2. Trending Motion (Videos)
-            item {
-                SectionHeader(title = "Trending Motion", subtitle = "Popular videos today")
-                Spacer(modifier = Modifier.height(12.dp))
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(popularVideos.itemCount) { index ->
-                        popularVideos[index]?.let { video ->
-                            val durationStr = if (video.duration >= 60) {
-                                "${video.duration / 60}:${(video.duration % 60).toString().padStart(2, '0')}"
-                            } else {
-                                "0:${video.duration.toString().padStart(2, '0')}"
-                            }
-                            
-                            AnimatedMediaCard(
-                                thumbnailUrl = video.image,
-                                aspectRatio = 1.2f, // Wider for videos
-                                title = video.user.name,
-                                isVideo = true,
-                                durationText = durationStr,
-                                index = index,
-                                onClick = { onVideoClick(video.id) },
-                                modifier = Modifier.width(260.dp)
-                            )
-                        }
-                    }
-                    if (popularVideos.loadState.refresh is LoadState.Loading) {
-                        items(5) {
-                            AnimatedMediaCard(
-                                thumbnailUrl = "",
-                                aspectRatio = 1.2f,
-                                title = "",
-                                isVideo = true,
-                                index = it,
-                                onClick = {},
-                                modifier = Modifier.width(260.dp),
-                                isPlaceholder = true
-                            )
-                        }
-                    }
-                    if (popularVideos.loadState.append is LoadState.Loading) {
-                        item {
-                            ShimmerPhotoCard(modifier = Modifier.width(260.dp))
-                        }
-                    }
+            if (curatedPhotos.loadState.refresh is LoadState.Loading) {
+                items(6) { index ->
+                    val placeholderRatio = if (index % 2 == 0) 0.8f else 1.2f
+                    AnimatedMediaCard(
+                        thumbnailUrl = "",
+                        aspectRatio = placeholderRatio,
+                        title = "",
+                        isVideo = false,
+                        index = index,
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        isPlaceholder = true
+                    )
                 }
             }
 
-
+            if (curatedPhotos.loadState.append is LoadState.Loading) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        ShimmerPhotoCard(modifier = Modifier.width(200.dp))
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun SectionHeader(title: String, subtitle: String, onSeeAllClick: (() -> Unit)? = null) {
+fun SectionHeader(
+    title: String, 
+    subtitle: String, 
+    modifier: Modifier = Modifier,
+    onSeeAllClick: (() -> Unit)? = null
+) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
@@ -254,7 +286,7 @@ fun CollectionCard(
         modifier = Modifier
             .width(160.dp)
             .height(120.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant

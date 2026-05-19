@@ -13,11 +13,13 @@ import com.rajatt7z.creamie.data.local.entity.*
         SearchHistoryEntity::class,
         DownloadHistoryEntity::class,
         RemoteKeyEntity::class,
-        FollowedEntity::class
+        FollowedEntity::class,
+        VideoEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
+@androidx.room.TypeConverters(Converters::class)
 abstract class CreamieDatabase : RoomDatabase() {
     abstract fun wallpaperDao(): WallpaperDao
     abstract fun collectionDao(): CollectionDao
@@ -26,4 +28,5 @@ abstract class CreamieDatabase : RoomDatabase() {
     abstract fun downloadHistoryDao(): DownloadHistoryDao
     abstract fun remoteKeyDao(): RemoteKeyDao
     abstract fun followedDao(): FollowedDao
+    abstract fun videoDao(): VideoDao
 }

@@ -89,3 +89,19 @@ data class FollowedEntity(
     val url: String,
     val followedAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "videos")
+data class VideoEntity(
+    @PrimaryKey val id: Int,
+    val width: Int,
+    val height: Int,
+    val url: String,
+    val image: String,
+    val duration: Int,
+    val userName: String,
+    val userId: Long,
+    val userUrl: String,
+    val videoFiles: List<com.rajatt7z.creamie.domain.model.VideoFile>,
+    val thumbnails: List<String>,
+    val cachedAt: Long = System.currentTimeMillis()
+)

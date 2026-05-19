@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WallpaperDao {
 
-    @Query("SELECT * FROM wallpapers WHERE queryOrCategory = :query ORDER BY cachedAt ASC")
+    @Query("SELECT * FROM wallpapers WHERE queryOrCategory = :query ORDER BY cachedAt ASC, id ASC")
     fun getWallpapersByQuery(query: String): PagingSource<Int, WallpaperEntity>
 
-    @Query("SELECT * FROM wallpapers WHERE queryOrCategory = 'curated' ORDER BY cachedAt ASC")
+    @Query("SELECT * FROM wallpapers WHERE queryOrCategory = 'curated' ORDER BY cachedAt ASC, id ASC")
     fun getCuratedWallpapers(): PagingSource<Int, WallpaperEntity>
 
     @Query("SELECT * FROM wallpapers WHERE id = :id")
